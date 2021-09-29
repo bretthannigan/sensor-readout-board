@@ -1,0 +1,6 @@
+*.vvp
+**/build/
+uart/
+SimpleSigmaDeltaADCSourceCode/
+Log_*.csv
+/cic/out.vcd
