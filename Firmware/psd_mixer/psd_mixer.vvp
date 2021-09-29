@@ -1,0 +1,76 @@
+#! /usr/local/iverilog/bin/vvp
+:ivl_version "11.0 (devel)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision + 0;
+:vpi_module "C:\iverilog\lib\ivl\system.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "C:\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "C:\iverilog\lib\ivl\va_math.vpi";
+S_0000000000966ae0 .scope module, "psd_mixer" "psd_mixer" 2 12;
+ .timescale 0 0;
+    .port_info 0 /INPUT 1 "i_clk";
+    .port_info 1 /INPUT 1 "i_en";
+    .port_info 2 /INPUT 1 "i_rst";
+    .port_info 3 /INPUT 1 "i_data";
+    .port_info 4 /INPUT 8 "i_sin";
+    .port_info 5 /INPUT 8 "i_cos";
+    .port_info 6 /OUTPUT 1 "o_i";
+    .port_info 7 /OUTPUT 1 "o_q";
+P_0000000000966c70 .param/l "DATA_WIDTH" 0 2 13, +C4<00000000000000000000000000000001>;
+P_0000000000966ca8 .param/l "SIN_WIDTH" 0 2 14, +C4<00000000000000000000000000001000>;
+o0000000000896fd8 .functor BUFZ 1, C4<z>; HiZ drive
+v0000000000966cf0_0 .net "i_clk", 0 0, o0000000000896fd8;  0 drivers
+o0000000000897008 .functor BUFZ 8, C4<zzzzzzzz>; HiZ drive
+v0000000000966d90_0 .net "i_cos", 7 0, o0000000000897008;  0 drivers
+o0000000000897038 .functor BUFZ 1, C4<z>; HiZ drive
+v0000000000966e30_0 .net "i_data", 0 0, o0000000000897038;  0 drivers
+o0000000000897068 .functor BUFZ 1, C4<z>; HiZ drive
+v000000000096bcd0_0 .net "i_en", 0 0, o0000000000897068;  0 drivers
+o0000000000897098 .functor BUFZ 1, C4<z>; HiZ drive
+v000000000096bd70_0 .net "i_rst", 0 0, o0000000000897098;  0 drivers
+o00000000008970c8 .functor BUFZ 8, C4<zzzzzzzz>; HiZ drive
+v000000000096be10_0 .net "i_sin", 7 0, o00000000008970c8;  0 drivers
+v000000000096beb0_0 .var "o_i", 0 0;
+v00000000008944d0_0 .var "o_q", 0 0;
+E_000000000096c2f0 .event posedge, v0000000000966cf0_0;
+    .scope S_0000000000966ae0;
+T_0 ;
+    %wait E_000000000096c2f0;
+    %load/vec4 v000000000096bcd0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.0, 8;
+    %load/vec4 v000000000096bd70_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.2, 8;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v000000000096beb0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v00000000008944d0_0, 0;
+    %jmp T_0.3;
+T_0.2 ;
+    %load/vec4 v0000000000966e30_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.4, 8;
+    %load/vec4 v000000000096be10_0;
+    %pad/u 1;
+    %assign/vec4 v000000000096beb0_0, 0;
+    %load/vec4 v0000000000966d90_0;
+    %pad/u 1;
+    %assign/vec4 v00000000008944d0_0, 0;
+    %jmp T_0.5;
+T_0.4 ;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v000000000096beb0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v00000000008944d0_0, 0;
+T_0.5 ;
+T_0.3 ;
+T_0.0 ;
+    %jmp T_0;
+    .thread T_0;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "psd_mixer.v";

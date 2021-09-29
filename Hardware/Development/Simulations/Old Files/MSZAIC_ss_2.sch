@@ -1,0 +1,542 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr USLetter 11000 8500
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L pspice:VSOURCE V2
+U 1 1 5F18B7B2
+P 1750 4250
+F 0 "V2" H 1978 4296 50  0000 L CNN
+F 1 "5" H 1978 4205 50  0000 L CNN
+F 2 "" H 1750 4250 50  0001 C CNN
+F 3 "~" H 1750 4250 50  0001 C CNN
+	1    1750 4250
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR07
+U 1 1 5F18C588
+P 1750 5000
+F 0 "#PWR07" H 1750 4750 50  0001 C CNN
+F 1 "GND" H 1755 4827 50  0000 C CNN
+F 2 "" H 1750 5000 50  0001 C CNN
+F 3 "" H 1750 5000 50  0001 C CNN
+	1    1750 5000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR06
+U 1 1 5F18D164
+P 1750 2500
+F 0 "#PWR06" H 1750 2350 50  0001 C CNN
+F 1 "VCC" H 1765 2673 50  0000 C CNN
+F 2 "" H 1750 2500 50  0001 C CNN
+F 3 "" H 1750 2500 50  0001 C CNN
+	1    1750 2500
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C1
+U 1 1 5F1DDDA7
+P 4250 3000
+F 0 "C1" V 4500 2950 50  0000 L CNN
+F 1 "5p" V 4400 2900 50  0000 L CNN
+F 2 "" H 4288 2850 50  0001 C CNN
+F 3 "~" H 4250 3000 50  0001 C CNN
+	1    4250 3000
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:VCC #PWR04
+U 1 1 5F227886
+P 3900 2500
+F 0 "#PWR04" H 3900 2350 50  0001 C CNN
+F 1 "VCC" H 3915 2673 50  0000 C CNN
+F 2 "" H 3900 2500 50  0001 C CNN
+F 3 "" H 3900 2500 50  0001 C CNN
+	1    3900 2500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1750 4550 1750 5000
+Wire Wire Line
+	4400 3250 4500 3250
+Wire Wire Line
+	4400 3000 4500 3000
+Wire Wire Line
+	4100 3000 4000 3000
+Wire Wire Line
+	4500 3250 4500 3750
+Connection ~ 4500 3750
+Wire Wire Line
+	1750 2500 1750 3950
+$Comp
+L pspice:OPAMP U1
+U 1 1 5F3D6721
+P 4000 3750
+F 0 "U1" H 4200 3500 50  0000 C CNN
+F 1 "OPAMP" H 4150 3600 50  0000 C CNN
+F 2 "" H 4000 3750 50  0001 C CNN
+F 3 "~" H 4000 3750 50  0001 C CNN
+F 4 "X" H 4000 3750 50  0001 C CNN "Spice_Primitive"
+F 5 "TLV376" H 4000 3750 50  0001 C CNN "Spice_Model"
+F 6 "Y" H 4000 3750 50  0001 C CNN "Spice_Netlist_Enabled"
+F 7 "/Users/brett/Documents/KiCad/Libraries/Spice Models/TLV4376_PSPICE/TLV376.LIB" H 4000 3750 50  0001 C CNN "Spice_Lib_File"
+F 8 "1 2 4 5 3" H 4000 3750 50  0001 C CNN "Spice_Node_Sequence"
+	1    4000 3750
+	1    0    0    -1  
+$EndComp
+$Comp
+L pspice:OPAMP U2
+U 1 1 5F3D6784
+P 5650 4400
+F 0 "U2" H 5900 4150 50  0000 C CNN
+F 1 "OPAMP" H 5850 4250 50  0000 C CNN
+F 2 "" H 5650 4400 50  0001 C CNN
+F 3 "~" H 5650 4400 50  0001 C CNN
+F 4 "X" H 5650 4400 50  0001 C CNN "Spice_Primitive"
+F 5 "TLV376" H 5650 4400 50  0001 C CNN "Spice_Model"
+F 6 "Y" H 5650 4400 50  0001 C CNN "Spice_Netlist_Enabled"
+F 7 "/Users/brett/Documents/KiCad/Libraries/Spice Models/TLV4376_PSPICE/TLV376.LIB" H 5650 4400 50  0001 C CNN "Spice_Lib_File"
+F 8 "1 2 4 5 3" H 5650 4400 50  0001 C CNN "Spice_Node_Sequence"
+	1    5650 4400
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	3900 2500 3900 3450
+$Comp
+L power:VCC #PWR011
+U 1 1 5F3E0748
+P 5750 2500
+F 0 "#PWR011" H 5750 2350 50  0001 C CNN
+F 1 "VCC" H 5765 2673 50  0000 C CNN
+F 2 "" H 5750 2500 50  0001 C CNN
+F 3 "" H 5750 2500 50  0001 C CNN
+	1    5750 2500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5750 2500 5750 4100
+Wire Wire Line
+	3500 3250 3500 3850
+Wire Wire Line
+	3600 3650 3600 4400
+Connection ~ 3600 3650
+Wire Wire Line
+	3600 3650 3700 3650
+Text Label 6250 4300 2    50   ~ 0
+Vout
+Text Label 2500 3650 2    50   ~ 0
+Vin
+Text Notes 1900 5650 0    50   ~ 0
+.ac dec 100 10 10meg\n\n
+Connection ~ 4500 3250
+Wire Wire Line
+	4500 3000 4500 3250
+Wire Wire Line
+	4000 3250 3500 3250
+Wire Wire Line
+	4000 3250 4100 3250
+Connection ~ 4000 3250
+Wire Wire Line
+	4000 3000 4000 3250
+Wire Wire Line
+	3600 4400 4000 4400
+Connection ~ 4000 4400
+Wire Wire Line
+	4000 4400 4100 4400
+Text Notes 1900 5650 0    50   ~ 0
+.tran 100n 10m
+$Comp
+L power:GND #PWR03
+U 1 1 5F41466D
+P 3900 5000
+F 0 "#PWR03" H 3900 4750 50  0001 C CNN
+F 1 "GND" H 3905 4827 50  0000 C CNN
+F 2 "" H 3900 5000 50  0001 C CNN
+F 3 "" H 3900 5000 50  0001 C CNN
+	1    3900 5000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR05
+U 1 1 5F4149D8
+P 5750 5000
+F 0 "#PWR05" H 5750 4750 50  0001 C CNN
+F 1 "GND" H 5755 4827 50  0000 C CNN
+F 2 "" H 5750 5000 50  0001 C CNN
+F 3 "" H 5750 5000 50  0001 C CNN
+	1    5750 5000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR02
+U 1 1 5F1D39E1
+P 2500 5000
+F 0 "#PWR02" H 2500 4750 50  0001 C CNN
+F 1 "GND" H 2505 4827 50  0000 C CNN
+F 2 "" H 2500 5000 50  0001 C CNN
+F 3 "" H 2500 5000 50  0001 C CNN
+	1    2500 5000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3500 3150 3500 3250
+Connection ~ 3500 3250
+Wire Wire Line
+	3500 2850 3500 2650
+Wire Wire Line
+	6250 3750 6250 4300
+Connection ~ 6250 4300
+Wire Wire Line
+	5950 4500 5950 4850
+Wire Wire Line
+	5950 4850 5150 4850
+Wire Wire Line
+	2500 4550 2500 5000
+Wire Wire Line
+	2500 3650 2500 3950
+Text Notes 2800 2200 0    50   ~ 0
+Howland Current Source
+Wire Notes Line
+	2800 2200 2800 5250
+Wire Wire Line
+	7350 2650 7350 4300
+Connection ~ 7350 4300
+Wire Notes Line
+	6300 4500 7300 4500
+Wire Notes Line
+	7300 4500 7300 3900
+Wire Notes Line
+	7300 3900 6300 3900
+Wire Notes Line
+	6300 3900 6300 4500
+Text Notes 6300 3900 0    50   ~ 0
+Sensor Model
+Wire Wire Line
+	6950 4650 7350 4650
+Wire Wire Line
+	6250 4300 6400 4300
+Wire Wire Line
+	5950 4300 6250 4300
+Wire Wire Line
+	4500 3750 4600 3750
+Wire Wire Line
+	4300 3750 4500 3750
+Wire Wire Line
+	3500 2650 7350 2650
+Wire Wire Line
+	4900 3750 6250 3750
+Wire Wire Line
+	5150 4850 5150 4400
+Connection ~ 5150 4400
+Wire Wire Line
+	5150 4400 5350 4400
+Wire Notes Line
+	5000 2200 5000 5250
+Wire Notes Line
+	5050 2200 5050 5250
+Wire Notes Line
+	5050 5250 6050 5250
+Wire Notes Line
+	6050 5250 6050 2200
+Wire Notes Line
+	6050 2200 5050 2200
+Text Notes 5050 2200 0    50   ~ 0
+Voltage Follower
+Wire Wire Line
+	4400 4700 4500 4700
+Wire Wire Line
+	4100 4700 4000 4700
+Wire Wire Line
+	4000 4700 4000 4400
+Wire Notes Line
+	2800 2200 5000 2200
+Wire Notes Line
+	2800 5250 5000 5250
+$Comp
+L pspice:VSOURCE V1
+U 1 1 5F1CFB9F
+P 2500 4250
+F 0 "V1" H 2350 3950 50  0000 L CNN
+F 1 "sine(2.5, 1, 100k)" H 1800 3850 50  0000 L CNN
+F 2 "" H 2500 4250 50  0001 C CNN
+F 3 "~" H 2500 4250 50  0001 C CNN
+	1    2500 4250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3900 4050 3900 5000
+Wire Wire Line
+	6250 4300 6250 4650
+Wire Wire Line
+	3500 3850 3700 3850
+Wire Wire Line
+	7350 4650 7350 4300
+$Comp
+L Device:C C3
+U 1 1 5F420D09
+P 4250 4700
+F 0 "C3" V 4100 4700 50  0000 C CNN
+F 1 "5p" V 4000 4700 50  0000 C CNN
+F 2 "" H 4288 4550 50  0001 C CNN
+F 3 "~" H 4250 4700 50  0001 C CNN
+	1    4250 4700
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	4500 4400 5150 4400
+Wire Wire Line
+	4400 4400 4500 4400
+Connection ~ 4500 4400
+Wire Wire Line
+	4500 4400 4500 4700
+Wire Wire Line
+	2500 3650 3100 3650
+Wire Wire Line
+	3400 3650 3600 3650
+Wire Wire Line
+	5750 4700 5750 5000
+Wire Wire Line
+	8350 5000 8700 5000
+Text Label 7500 4300 0    50   ~ 0
+Vgnd
+Wire Wire Line
+	7350 4300 7500 4300
+Wire Wire Line
+	8350 3400 9050 3400
+Wire Wire Line
+	8700 5000 9050 5000
+Wire Wire Line
+	9050 4750 9050 5000
+Wire Wire Line
+	9050 3400 9050 3650
+Wire Wire Line
+	9050 4200 9050 4450
+Connection ~ 9050 4200
+Wire Wire Line
+	8700 4200 9050 4200
+Wire Wire Line
+	9050 3950 9050 4200
+Text Notes 7400 2200 0    50   ~ 0
+Rail Splitter
+Wire Notes Line
+	7400 5300 9350 5300
+Wire Notes Line
+	7400 2200 7400 5300
+Wire Notes Line
+	9350 2200 7400 2200
+Wire Notes Line
+	9350 5300 9350 2200
+$Comp
+L pspice:OPAMP U3
+U 1 1 5F3B4309
+P 8250 4300
+F 0 "U3" H 8450 4050 50  0000 C CNN
+F 1 "OPAMP" H 8400 4150 50  0000 C CNN
+F 2 "" H 8250 4300 50  0001 C CNN
+F 3 "~" H 8250 4300 50  0001 C CNN
+F 4 "X" H 8250 4300 50  0001 C CNN "Spice_Primitive"
+F 5 "TLV376" H 8250 4300 50  0001 C CNN "Spice_Model"
+F 6 "Y" H 8250 4300 50  0001 C CNN "Spice_Netlist_Enabled"
+F 7 "/Users/brett/Documents/KiCad/Libraries/Spice Models/TLV4376_PSPICE/TLV376.LIB" H 8250 4300 50  0001 C CNN "Spice_Lib_File"
+F 8 "1 2 4 5 3" H 8250 4300 50  0001 C CNN "Spice_Node_Sequence"
+	1    8250 4300
+	-1   0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR0101
+U 1 1 5F3B6547
+P 8350 2500
+F 0 "#PWR0101" H 8350 2350 50  0001 C CNN
+F 1 "VCC" H 8365 2673 50  0000 C CNN
+F 2 "" H 8350 2500 50  0001 C CNN
+F 3 "" H 8350 2500 50  0001 C CNN
+	1    8350 2500
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0102
+U 1 1 5F3B9C6E
+P 8700 5000
+F 0 "#PWR0102" H 8700 4750 50  0001 C CNN
+F 1 "GND" H 8705 4827 50  0000 C CNN
+F 2 "" H 8700 5000 50  0001 C CNN
+F 3 "" H 8700 5000 50  0001 C CNN
+	1    8700 5000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8550 4650 8550 4400
+$Comp
+L Device:R R8
+U 1 1 5F3D78F6
+P 9050 3800
+F 0 "R8" H 9120 3846 50  0000 L CNN
+F 1 "100k" H 9120 3755 50  0000 L CNN
+F 2 "" V 8980 3800 50  0001 C CNN
+F 3 "~" H 9050 3800 50  0001 C CNN
+	1    9050 3800
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R9
+U 1 1 5F3D9C21
+P 9050 4600
+F 0 "R9" H 9120 4646 50  0000 L CNN
+F 1 "100k" H 9120 4555 50  0000 L CNN
+F 2 "" V 8980 4600 50  0001 C CNN
+F 3 "~" H 9050 4600 50  0001 C CNN
+	1    9050 4600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8550 4200 8700 4200
+Wire Wire Line
+	8350 4600 8350 5000
+Wire Wire Line
+	8350 2500 8350 3400
+Connection ~ 8350 3400
+Wire Wire Line
+	8350 3400 8350 4000
+Wire Wire Line
+	8700 4450 8700 4200
+Connection ~ 8700 4200
+Wire Wire Line
+	8700 4750 8700 5000
+Connection ~ 8700 5000
+$Comp
+L Device:R R10
+U 1 1 5F45E853
+P 7800 4300
+F 0 "R10" V 7593 4300 50  0000 C CNN
+F 1 "1k" V 7684 4300 50  0000 C CNN
+F 2 "" V 7730 4300 50  0001 C CNN
+F 3 "~" H 7800 4300 50  0001 C CNN
+	1    7800 4300
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	7500 4650 7500 4300
+Connection ~ 7500 4300
+$Comp
+L Device:C C4
+U 1 1 5F3BBBA1
+P 8700 4600
+F 0 "C4" H 8815 4646 50  0000 L CNN
+F 1 "100n" H 8815 4555 50  0000 L CNN
+F 2 "" H 8738 4450 50  0001 C CNN
+F 3 "~" H 8700 4600 50  0001 C CNN
+	1    8700 4600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7500 4300 7650 4300
+Wire Wire Line
+	7500 4650 8550 4650
+$Comp
+L Device:R R4
+U 1 1 5F47190F
+P 4250 4400
+F 0 "R4" V 4043 4400 50  0000 C CNN
+F 1 "100k" V 4134 4400 50  0000 C CNN
+F 2 "" V 4180 4400 50  0001 C CNN
+F 3 "~" H 4250 4400 50  0001 C CNN
+	1    4250 4400
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R1
+U 1 1 5F1C6E02
+P 3250 3650
+F 0 "R1" V 3350 3650 50  0000 C CNN
+F 1 "100k" V 3450 3650 50  0000 C CNN
+F 2 "" V 3180 3650 50  0001 C CNN
+F 3 "~" H 3250 3650 50  0001 C CNN
+	1    3250 3650
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R3
+U 1 1 5F1D6044
+P 4250 3250
+F 0 "R3" V 4150 3300 50  0000 R CNN
+F 1 "100k" V 4050 3350 50  0000 R CNN
+F 2 "" V 4180 3250 50  0001 C CNN
+F 3 "~" H 4250 3250 50  0001 C CNN
+	1    4250 3250
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:R R2
+U 1 1 5F1C55E3
+P 3500 3000
+F 0 "R2" H 3400 2950 50  0000 C CNN
+F 1 "100k" H 3350 3050 50  0000 C CNN
+F 2 "" V 3430 3000 50  0001 C CNN
+F 3 "~" H 3500 3000 50  0001 C CNN
+	1    3500 3000
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R R7
+U 1 1 5F48220F
+P 6550 4300
+F 0 "R7" V 6343 4300 50  0000 C CNN
+F 1 "3k" V 6434 4300 50  0000 C CNN
+F 2 "" V 6480 4300 50  0001 C CNN
+F 3 "~" H 6550 4300 50  0001 C CNN
+	1    6550 4300
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	6250 4650 6650 4650
+$Comp
+L Device:R R5
+U 1 1 5F22D5BE
+P 4750 3750
+F 0 "R5" V 4543 3750 50  0000 C CNN
+F 1 "100k" V 4634 3750 50  0000 C CNN
+F 2 "" V 4680 3750 50  0001 C CNN
+F 3 "~" H 4750 3750 50  0001 C CNN
+	1    4750 3750
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	7200 4300 7350 4300
+Wire Wire Line
+	6700 4300 6900 4300
+$Comp
+L Device:R R6
+U 1 1 5F482BDB
+P 6800 4650
+F 0 "R6" H 6730 4604 50  0000 R CNN
+F 1 "10k" H 6730 4695 50  0000 R CNN
+F 2 "" V 6730 4650 50  0001 C CNN
+F 3 "~" H 6800 4650 50  0001 C CNN
+	1    6800 4650
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:C C2
+U 1 1 5F480812
+P 7050 4300
+F 0 "C2" V 6798 4300 50  0000 C CNN
+F 1 "12n" V 6889 4300 50  0000 C CNN
+F 2 "" H 7088 4150 50  0001 C CNN
+F 3 "~" H 7050 4300 50  0001 C CNN
+	1    7050 4300
+	0    1    1    0   
+$EndComp
+$EndSCHEMATC

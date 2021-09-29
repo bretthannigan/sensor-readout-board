@@ -1,0 +1,6 @@
+[submodule "Firmware/verilog-lfsr"]
+	path = Firmware/verilog-lfsr
+	url = https://github.com/alexforencich/verilog-lfsr.git
+[submodule "Firmware/osdvu"]
+	path = Firmware/osdvu
+	url = https://github.com/cyrozap/osdvu.git

@@ -1,0 +1,16 @@
+.title KiCad schematic
+V1 Net-_R4-Pad1_ GND VSOURCE
+U1 GND Net-_C1-Pad2_ Net-_C1-Pad1_ NC_01 NC_02 OPAMP
+U2 GND Net-_R6-Pad2_ Net-_R2-Pad2_ NC_03 NC_04 OPAMP
+U3 GND Net-_C2-Pad2_ /Vout NC_05 NC_06 OPAMP
+R1 Net-_C1-Pad1_ Net-_C1-Pad2_ R
+C1 Net-_C1-Pad1_ Net-_C1-Pad2_ C
+R7 Net-_R6-Pad2_ Net-_C1-Pad1_ R
+R6 Net-_R4-Pad1_ Net-_R6-Pad2_ R
+R8 Net-_R2-Pad2_ Net-_R6-Pad2_ R
+R2 Net-_C2-Pad2_ Net-_R2-Pad2_ R
+C2 /Vout Net-_C2-Pad2_ C
+R4 Net-_R4-Pad1_ Net-_C1-Pad2_ R
+R5 Net-_R4-Pad1_ Net-_C2-Pad2_ R
+R3 /Vout Net-_C1-Pad2_ R
+.end
