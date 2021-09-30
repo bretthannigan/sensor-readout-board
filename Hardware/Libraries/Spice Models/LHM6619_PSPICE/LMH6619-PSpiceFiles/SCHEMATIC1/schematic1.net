@@ -1,0 +1,10 @@
+* source LMH6619
+R_R1         N01485 VOUT  2000 TC=0,0 
+V_V2         VREF 0 0Vdc
+V_V4         VIN VREF  AC 1
++SIN 0 1 5e6 0 0 0
+R_R4         VOUT VREF  1000 TC=0,0 
+R_R2         VREF N01485  2000 TC=0,0 
+V_V1         VCC 0 5Vdc
+V_V3         VEE 0 -5Vdc
+X_U1         VIN N01485 VCC VEE VOUT LMH6618

@@ -116,7 +116,7 @@ Wire Wire Line
 Wire Wire Line
 	3450 3150 3400 3150
 Wire Wire Line
-	3400 3150 3400 5000
+	3400 3150 3400 4300
 $Comp
 L power:VDD #PWR010
 U 1 1 5F75604E
@@ -306,7 +306,7 @@ F 4 "X" H 7750 3250 50  0001 C CNN "Spice_Primitive"
 F 5 "LM6211" H 7750 3250 50  0001 C CNN "Spice_Model"
 F 6 "Y" H 7750 3250 50  0001 C CNN "Spice_Netlist_Enabled"
 F 7 "1 2 4 5 3" H 7750 3250 50  0001 C CNN "Spice_Node_Sequence"
-F 8 "/Users/brett/Documents/KiCad/Libraries/Spice Models/LM6211_PSPICE/LM6211.MOD" H 7750 3250 50  0001 C CNN "Spice_Lib_File"
+F 8 "C:\\Users\\brett\\Documents\\Kicad\\Libraries\\Spice Models\\LM6211_PSPICE\\LM6211.MOD" H 7750 3250 50  0001 C CNN "Spice_Lib_File"
 	1    7750 3250
 	1    0    0    -1  
 $EndComp
@@ -322,7 +322,7 @@ F 4 "X" H 5750 3250 50  0001 C CNN "Spice_Primitive"
 F 5 "LM6211" H 5750 3250 50  0001 C CNN "Spice_Model"
 F 6 "Y" H 5750 3250 50  0001 C CNN "Spice_Netlist_Enabled"
 F 7 "1 2 4 5 3" H 5750 3250 50  0001 C CNN "Spice_Node_Sequence"
-F 8 "/Users/brett/Documents/KiCad/Libraries/Spice Models/LM6211_PSPICE/LM6211.MOD" H 5750 3250 50  0001 C CNN "Spice_Lib_File"
+F 8 "C:\\Users\\brett\\Documents\\Kicad\\Libraries\\Spice Models\\LM6211_PSPICE\\LM6211.MOD" H 5750 3250 50  0001 C CNN "Spice_Lib_File"
 	1    5750 3250
 	1    0    0    -1  
 $EndComp
@@ -338,7 +338,7 @@ F 4 "X" H 3750 3250 50  0001 C CNN "Spice_Primitive"
 F 5 "LM6211" H 3750 3250 50  0001 C CNN "Spice_Model"
 F 6 "Y" H 3750 3250 50  0001 C CNN "Spice_Netlist_Enabled"
 F 7 "1 2 4 5 3" H 3750 3250 50  0001 C CNN "Spice_Node_Sequence"
-F 8 "/Users/brett/Documents/KiCad/Libraries/Spice Models/LM6211_PSPICE/LM6211.MOD" H 3750 3250 50  0001 C CNN "Spice_Lib_File"
+F 8 "C:\\Users\\brett\\Documents\\Kicad\\Libraries\\Spice Models\\LM6211_PSPICE\\LM6211.MOD" H 3750 3250 50  0001 C CNN "Spice_Lib_File"
 	1    3750 3250
 	1    0    0    -1  
 $EndComp
@@ -485,6 +485,89 @@ F 1 "11.3k" V 3134 2500 50  0000 C CNN
 F 2 "" V 3180 2500 50  0001 C CNN
 F 3 "~" H 3250 2500 50  0001 C CNN
 	1    3250 2500
+	0    1    1    0   
+$EndComp
+$Comp
+L pspice:VSOURCE V5
+U 1 1 60DA7C6D
+P 4400 5000
+F 0 "V5" H 4628 5046 50  0000 L CNN
+F 1 "pulse(0, 3.3, 3m, 0, 0, 1m)" H 4628 4955 50  0000 L CNN
+F 2 "" H 4400 5000 50  0001 C CNN
+F 3 "~" H 4400 5000 50  0001 C CNN
+	1    4400 5000
+	1    0    0    -1  
+$EndComp
+$Comp
+L pspice:VSOURCE V4
+U 1 1 60DA812D
+P 1000 4250
+F 0 "V4" H 1228 4296 50  0000 L CNN
+F 1 "pulse(0, 3.3, 1m, 0, 0, 1m)" H 1228 4205 50  0000 L CNN
+F 2 "" H 1000 4250 50  0001 C CNN
+F 3 "~" H 1000 4250 50  0001 C CNN
+	1    1000 4250
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R9
+U 1 1 60DA8B6D
+P 1250 3350
+F 0 "R9" V 1043 3350 50  0000 C CNN
+F 1 "30k" V 1134 3350 50  0000 C CNN
+F 2 "" V 1180 3350 50  0001 C CNN
+F 3 "~" H 1250 3350 50  0001 C CNN
+	1    1250 3350
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	1100 3350 1000 3350
+Wire Wire Line
+	1000 3350 1000 3950
+Wire Wire Line
+	1000 4550 1000 5000
+Wire Wire Line
+	1000 5000 2250 5000
+Wire Wire Line
+	1400 3350 3000 3350
+Wire Wire Line
+	3400 4950 3400 5000
+Wire Wire Line
+	3750 4300 3400 4300
+Connection ~ 3400 4300
+Wire Wire Line
+	3400 4300 3400 4650
+Wire Wire Line
+	4050 4300 4400 4300
+Wire Wire Line
+	4400 4300 4400 4700
+Wire Wire Line
+	4400 5300 2650 5300
+Wire Wire Line
+	2650 5300 2650 5000
+Wire Wire Line
+	2650 5000 2400 5000
+Connection ~ 2400 5000
+$Comp
+L Device:R R10
+U 1 1 60DADB70
+P 3400 4800
+F 0 "R10" H 3470 4846 50  0000 L CNN
+F 1 "500" H 3470 4755 50  0000 L CNN
+F 2 "" V 3330 4800 50  0001 C CNN
+F 3 "~" H 3400 4800 50  0001 C CNN
+	1    3400 4800
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R11
+U 1 1 60DAE3D1
+P 3900 4300
+F 0 "R11" V 3693 4300 50  0000 C CNN
+F 1 "4.5k" V 3784 4300 50  0000 C CNN
+F 2 "" V 3830 4300 50  0001 C CNN
+F 3 "~" H 3900 4300 50  0001 C CNN
+	1    3900 4300
 	0    1    1    0   
 $EndComp
 $EndSCHEMATC

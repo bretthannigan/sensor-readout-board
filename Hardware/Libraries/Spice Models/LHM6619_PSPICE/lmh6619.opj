@@ -1,0 +1,76 @@
+(ExpressProject "LMH6619"
+  (ProjectVersion "19981106")
+  (SoftwareVersion "17.4-2020 S006-[05/27/21]")
+  (ProjectType "Analog or A/D Mixed Mode")
+  (Folder "Design Resources"
+    (Folder "Library"
+      (File ".\library\lmh6619.olb"
+        (Type "Schematic Library")))
+    ("Allegro Netlist Directory" "allegro")
+    (DOCKED "TRUE")
+    (DOCKING_POSITION "61215")
+    (NoModify)
+    (File ".\lmh6619.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x")
+    (PSPICE_Regenerate_Netlist_Flag "FALSE"))
+  (Folder "Layout")
+  (Folder "Outputs"
+    (File ".\lmh6619-pspicefiles\schematic1\schematic1.net"
+      (Type "Report")))
+  (Folder "PSpice Resources"
+    (Folder "Simulation Profiles"
+      (ActiveProfile ".\lmh6619-pspicefiles\schematic1\transientanalysis.sim")
+      (File.PSpice.{09528990-3187-11D2-BC7B-00A0C90CBF91}
+         ".\lmh6619-pspicefiles\schematic1\transientanalysis.sim"
+        (DisplayName "SCHEMATIC1-TransientAnalysis")
+        (Type "PSpice Profile")))
+    (Folder "Model Libraries"
+      (Sort User)
+      (File ".\lmh6619.lib"
+        (Type "PSpiceLibrary")
+        (DisplayName ".\LMH6619.lib")))
+    (Folder "Stimulus Files"
+      (Sort User))
+    (Folder "Include Files"
+      (Sort User)))
+  (DefaultLibraryBrowseDirectory "library\PSpice")
+  (Folder "Logs")
+  (PartMRUSelector
+    (LMH6618
+      (FullPartName "LMH6618.Normal")
+      (LibraryName "C:\USERS\A0232073\DOWNLOADS\LMH6618\LMH6619.OLB")
+      (DeviceIndex "0"))
+    (LMH6619
+      (FullPartName "LMH6619.Normal")
+      (LibraryName "C:\USERS\A0232073\DOWNLOADS\LMH6618\LMH6619.OLB")
+      (DeviceIndex "0")))
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Design Resources" ".\lmh6619.dsn")
+      (Path "Design Resources" ".\lmh6619.dsn" "SCHEMATIC1")
+      (Path "Design Resources" "Library")
+      (Path "Outputs")
+      (Path "PSpice Resources")
+      (Path "PSpice Resources" "Model Libraries")
+      (Path "PSpice Resources" "Simulation Profiles")
+      (Select "Design Resources"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 0 200 0 875"))
+      (Tab 0))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 5 987 24 893")
+        (Scroll "0 -8")
+        (Zoom "114")
+        (Occurrence "/"))
+      (Path "C:\USERS\A0232073\DOWNLOADS\LMH6618\LMH6619.DSN")
+      (Schematic "SCHEMATIC1")
+      (Page "PAGE1")))
+  (MPSSessionName "a0232073"))
