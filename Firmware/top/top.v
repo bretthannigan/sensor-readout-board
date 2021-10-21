@@ -30,10 +30,26 @@
 `endif
 `include "../uart/osdvu/uart.v"
 
-module top(clk, i_adc, o_dac, o_clk, o_sclk, o_adcfb_n, o_adcfb_p, o_led, o_test, i_RS232_RX, o_RS232_TX);
+module top(
+	clk,
+
+	i_sclk,
+	i_sw_rst, i_sw_cal, i_sw_trig, i_sw_aux,
+	i_sd_a,	i_sd_b,
+	i_RS232_RX,
+
+	o_clk,
+	o_sclk,
+	o_en,
+	o_test,
+	o_led, o_led_en, o_led_busy, o_led_tx, o_led_aux,
+	o_dac,
+	o_adc_en_n,	o_adc_zero,	o_adc_cal, o_adc_rst,
+	o_RS232_TX
+)
 	
-input wire clk, i_adc, i_RS232_RX;
-output wire o_dac, o_clk, o_sclk, o_adcfb_n, o_adcfb_p, o_RS232_TX;
+input wire clk, i_sclk, i_sw_rst, i_sw_cal, i_sw_trig, i_sw_aux, i_sd_a, i_sd_b, i_RS232_RX;
+output wire o_clk, o_sclk, o_en, o_led_en, o_led_busy, o_led_tx, o_led_aux, o_dac, o_RS232_TX;
 output wire [7:0] o_led;
 output wire [3:0] o_test;
 
