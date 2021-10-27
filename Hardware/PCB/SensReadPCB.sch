@@ -750,37 +750,6 @@ V_EXC_A
 Text Label 5050 2250 2    50   ~ 0
 I_EXC
 Wire Wire Line
-	9800 4400 9800 4500
-Wire Wire Line
-	9800 5300 9800 5400
-Connection ~ 9800 4400
-Connection ~ 9800 4500
-Wire Wire Line
-	9800 4500 9800 4600
-Connection ~ 9800 4600
-Wire Wire Line
-	9800 4600 9800 4700
-Connection ~ 9800 4700
-Wire Wire Line
-	9800 4700 9800 4800
-Connection ~ 9800 5300
-Connection ~ 9800 5400
-Wire Wire Line
-	9800 5400 9800 5500
-Connection ~ 9800 5500
-Wire Wire Line
-	9800 5500 9800 5600
-Connection ~ 9800 5600
-Wire Wire Line
-	9800 5600 9800 5700
-Connection ~ 9800 5700
-Wire Wire Line
-	9800 5700 9800 5800
-Connection ~ 9800 5800
-Wire Wire Line
-	9800 5800 9800 5900
-Connection ~ 9800 6100
-Wire Wire Line
 	4600 5300 4850 5300
 Wire Wire Line
 	4850 5200 4850 5300
@@ -871,7 +840,7 @@ F 3 "" H 4250 4100 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Rev2-rescue:LM6142AIM-LM6142AIM U2
+L LM6142AIM:LM6142AIM U2
 U 1 1 61434DFC
 P 3050 4750
 F 0 "U2" H 3050 5420 50  0000 C CNN
@@ -914,7 +883,6 @@ Wire Wire Line
 	4100 5650 4100 5550
 Wire Wire Line
 	4100 5250 4100 5150
-Connection ~ 3750 5150
 $Comp
 L Device:C C2
 U 1 1 6169E4D8
@@ -2303,4 +2271,8 @@ Wire Wire Line
 	3100 550  5300 550 
 Wire Wire Line
 	5300 550  5300 1000
+Wire Wire Line
+	9800 4400 9800 4800
+Wire Wire Line
+	9800 5300 9800 5900
 $EndSCHEMATC

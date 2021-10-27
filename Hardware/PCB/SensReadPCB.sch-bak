@@ -1798,8 +1798,8 @@ Wire Wire Line
 	5250 5900 5250 5600
 Wire Wire Line
 	5250 5600 5550 5600
-Text Notes 8300 6400 0    50   ~ 0
-C16, C20, C21 10u capacitors are tantalum
+Text Notes 8150 6400 0    50   ~ 0
+C16, C20, C21, C24 10u capacitors are tantalum
 $Comp
 L Device:R R16
 U 1 1 61662C1D

@@ -1,0 +1,7 @@
+(sym_lib_table
+  (lib (name 2020-10-07_19-26-36)(type Legacy)(uri /Users/brett/Documents/KiCad/Libraries/Downloads/ul_LM6144AIMNOPB/KiCAD/2020-10-07_19-26-36/2020-10-07_19-26-36.lib)(options "")(descr ""))
+  (lib (name 2020-11-28_00-11-22)(type Legacy)(uri /Users/brett/Documents/KiCad/Libraries/Downloads/ul_LMH6619MANOPB/KiCAD/2020-11-28_00-11-22/2020-11-28_00-11-22.lib)(options "")(descr ""))
+  (lib (name 2020-11-28_01-19-03)(type Legacy)(uri /Users/brett/Documents/KiCad/Libraries/Downloads/ul_LP2985A10DBVR/KiCAD/2020-11-28_01-19-03/2020-11-28_01-19-03.lib)(options "")(descr ""))
+  (lib (name 2020-11-28_01-42-31)(type Legacy)(uri /Users/brett/Documents/KiCad/Libraries/Downloads/ul_MAX903CSA/KiCAD/2020-11-28_01-42-31/2020-11-28_01-42-31.lib)(options "")(descr ""))
+  (lib (name MSZAIC_pcb-rescue)(type Legacy)(uri ${KIPRJMOD}/MSZAIC_pcb-rescue.lib)(options "")(descr ""))
+)
