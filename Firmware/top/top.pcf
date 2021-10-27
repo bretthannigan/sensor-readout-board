@@ -17,19 +17,35 @@
 set_io --warn-no-port clk   J3
 set_io o_en                 G1
 
-### Testing Outputs
-
-set_io o_test[0]            C16
-set_io o_test[1]            B16
-set_io o_test[2]            D16
-set_io o_test[3]            D14
-
 ### Switch Inputs
 
 set_io i_sw_rst             P1
 set_io i_sw_cal             N3
 set_io i_sw_trig            M2
 set_io i_sw_aux             L3
+
+### ADC Inputs
+
+set_io i_sclk               H2
+set_io i_sd_a               J1
+set_io i_sd_b               F1
+
+### UART (FTDI Channel B)
+
+set_io i_RS232_RX           B10
+set_io o_RS232_TX           B12
+set_io RTSn                 B13
+set_io CTSn                 A15
+set_io DTRn                 A16
+set_io DSRn                 B14
+set_io DCDn                 B15
+
+### Testing Outputs
+
+set_io o_test[0]            C16
+set_io o_test[1]            B16
+set_io o_test[2]            D16
+set_io o_test[3]            D14
 
 ### LED Outputs
 
@@ -47,6 +63,10 @@ set_io o_led_busy           P2
 set_io o_led_tx             N2
 set_io o_led_aux            M1
 
+### DAC Outputs
+
+set_io o_dac                E2
+
 ### ADC Outputs
 
 set_io o_adc_en_n           L1
@@ -54,23 +74,3 @@ set_io o_adc_zero           K3
 set_io o_adc_cal            G2
 set_io o_adc_rst            K1
 set_io o_sclk               J2
-
-# ADC Inputs
-
-set_io i_sclk               H2
-set_io i_sd_a               J1
-set_io i_sd_b               F1
-
-### DAC Outputs
-
-set_io o_dac                E2
-
-### UART (FTDI Channel B)
-
-set_io i_RS232_RX           B10
-set_io o_RS232_TX           B12
-set_io RTSn                 B13
-set_io CTSn                 A15
-set_io DTRn                 A16
-set_io DSRn                 B14
-set_io DCDn                 B15
