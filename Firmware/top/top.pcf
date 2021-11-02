@@ -65,7 +65,7 @@ set_io o_led_aux            M1
 
 ### DAC Outputs
 
-set_io o_dac                E2
+set_io o_dac                F2
 
 ### ADC Outputs
 

@@ -1,0 +1,115 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "echo",
+            "type": "shell",
+            "command": "echo Hello"
+        },
+        {
+            "label": "Compile Verilog File",
+            "type": "shell",
+            "command": "cd '${fileDirname}' ; iverilog -o ${fileBasenameNoExtension}.vvp ${fileBasename} ; vvp -N ${fileBasenameNoExtension}.vvp",
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "Run GTKWave",
+            "type": "shell",
+            "windows": {
+                "command": "cd '${fileDirname}' ; gtkwave out.vcd"
+            },
+            "osx": {
+                "command": "cd '${fileDirname}' ; open -a /Applications/gtkwave.app out.vcd"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Visualize Verilog File",
+            "type": "shell",
+            "command": "cd '${fileDirname}' ; yosys -p \"prep ; show -stretch -width -prefix ${fileBasenameNoExtension} -format png ${fileBasenameNoExtension}\" ${fileBasename}; open ${fileBasenameNoExtension}.png",
+            "problemMatcher": []
+        },
+        {
+            "label": "Synthesize Verilog File (iCE40)",
+            "type": "shell",
+            "command": "cd",
+            "args": [
+                "'${fileDirname}';",
+                "mkdir",
+                "build;",
+                "yosys",
+                "-l",
+                "build/${fileBasenameNoExtension}.syn",
+                "-p",
+                "synth_ice40 -top ${fileBasenameNoExtension} -json build/${fileBasenameNoExtension}.json",
+                "${fileBasename}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Place & Route (iCE40)",
+            "type": "shell",
+            "command": "cd '${fileDirname}' ; nextpnr-ice40 --hx8k --json build/${fileBasenameNoExtension}.json --pcf ${fileBasenameNoExtension}.pcf --asc build/${fileBasenameNoExtension}.asc --package ct256 --log build/${fileBasenameNoExtension}.tim --ignore-loops",
+            "problemMatcher": [],
+            "dependsOn": "Synthesize Verilog File (iCE40)",
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "Produce Timing Report (iCE40)",
+            "type": "shell",
+            "command": "cd '${fileDirname}' ; icetime -d hx8k -mtr build/${fileBasenameNoExtension}.asc",
+            "problemMatcher": [],
+            "dependsOn": "Place & Route (iCE40)",
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "Pack Binary File (iCE40)",
+            "type": "shell",
+            "command": "cd '${fileDirname}' ; icepack build/${fileBasenameNoExtension}.asc build/${fileBasenameNoExtension}.bin",
+            "problemMatcher": [],
+            "dependsOn": "Place & Route (iCE40)",
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "Program SRAM (iCE40)",
+            "type": "shell",
+            "windows": {
+                "command": "cd '${fileDirname}' ; iceprog -S build/${fileBasenameNoExtension}.bin"
+            },
+            "osx": {
+                "command": "cd '${fileDirname}' ; kextstat | grep FTDIUSBSerialDriver && sudo kextunload -b com.FTDI.driver.FTDIUSBSerialDriver ; iceprog -S build/${fileBasenameNoExtension}.bin"
+            },
+            "problemMatcher": [],
+            "dependsOn": "Pack Binary File (iCE40)",
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "Program Flash (iCE40)",
+            "type": "shell",
+            "windows": {
+                "command": "cd '${fileDirname}' ; iceprog build/${fileBasenameNoExtension}.bin"
+            },
+            "osx": {
+                "command": "cd '${fileDirname}' ; kextstat | grep FTDIUSBSerialDriver && sudo kextunload -b com.FTDI.driver.FTDIUSBSerialDriver ; iceprog build/${fileBasenameNoExtension}.bin"
+            },
+            "problemMatcher": [],
+            "dependsOn": "Pack Binary File (iCE40)",
+            "dependsOrder": "sequence"
+        },
+        {
+            "type": "shell",
+            "label": "MSVC Build",
+            "windows": {
+                "command": "'cd ${fileDirname}' ; ${env:USERPROFILE}/.vscode/build.bat ${fileBasename} ${fileBasenameNoExtension}"
+            },
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

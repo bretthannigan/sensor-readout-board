@@ -15,7 +15,7 @@ import argparse
 
 # Command line parameters
 parser = argparse.ArgumentParser(description='Logging utility for MENRVA sensor readout board.')
-parser.add_argument('--port', dest='port', action='store', default="COM14", help='Serial port for readout board.')
+parser.add_argument('--port', dest='port', action='store', default="COM8", help='Serial port for readout board.')
 parser.add_argument('--logfile', dest='logfile', action='store', default=datetime.datetime.now().strftime("Log_%Y-%m-%dT%H%M%S.csv"), help='Custom log file name.')
 parser.add_argument('--plot', dest='plot', action='store_true', default=True, help='Turn on/off plotting data (default=on)')
 parser.add_argument('--mode', dest='mode', action='store', choices=['raw', 'iq', 'magphase', 'RCparallel', 'RCparallel'], default='RCseries', help='Impedance calculation mode.')

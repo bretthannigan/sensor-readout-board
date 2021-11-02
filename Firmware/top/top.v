@@ -56,25 +56,27 @@ reg rst, en;
 wire sclk;
 
 initial begin
-	rst = 0;
 	en = 1;
 
-    o_en = 0;
-    o_led_en = 0;
     o_led_busy = 0;
-    o_led_tx = 0;
     o_led_aux = 0;
-    
-    o_RS232_TX = 0;
 end
 
 always @(*) 
 begin
-	o_led_en <= ~i_sw_rst;
 	o_led_busy <= ~i_sw_cal;
-	o_led_tx <= ~i_sw_trig;
 	o_led_aux <= ~i_sw_aux;
 end
+
+// Enable
+assign o_led_en = en;
+assign o_en = en;
+assign o_adc_en_n = ~en;
+// Reset
+assign o_sclk = sclk;
+assign rst = ~i_sw_rst;
+
+assign sclk = clk25div[1];
 
 // Sampling clock generation
 
@@ -97,8 +99,6 @@ counter_mod2 #(
 	.i_ld(1'b0),
 	.o_data(clk25div)
 );
-
-assign sclk = clk25div[1];
 
 // Sine wave generator
 
@@ -133,5 +133,167 @@ mod2_dac #(
     .i_data(sin),
     .o_sd(o_dac)
 );
+
+// Delay line
+
+wire[15:0] sin_delay;
+wire[15:0] cos_delay;
+
+shift #(
+	.WIDTH(16),
+	.LENGTH(3)
+) sin_delay_line (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(sin),
+	.o_par(sin_delay)
+);
+
+shift #(
+	.WIDTH(16),
+	.LENGTH(3)
+) cos_delay_line (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(cos),
+	.o_par(cos_delay)
+);
+
+// Phase-sensitive detector
+
+wire signed [15:0] i0, q0;
+
+psd_mixer #(
+	.DATA_WIDTH(1),
+	.SIN_WIDTH(16)
+) psd (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(i_sd_a),
+	.i_sin(sin_delay),
+	.i_cos(cos_delay),
+	.o_i(i0),
+	.o_q(q0)
+);
+
+localparam CIC_OUTPUT_WIDTH = 106;
+wire dclk;
+wire[(CIC_OUTPUT_WIDTH-1):0] i0_long;
+wire[(CIC_OUTPUT_WIDTH-1):0] q0_long;
+// wire[15:0] i0_long;
+// wire[15:0] q0_long;
+
+// Decimation Filter
+
+cic #(
+	.I_WIDTH(16),
+	.ORDER(5),
+	.DECIMATION_BITS(18)
+) cic_i0 (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(i0),
+	.o_data(i0_long),
+	.o_clk(dclk)
+);
+
+cic #(
+	.I_WIDTH(16),
+	.ORDER(5),
+	.DECIMATION_BITS(18)
+) cic_q0 (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(q0),
+	.o_data(q0_long)
+);
+
+wire [15:0] i0_short, q0_short;
+assign i0_short = i0_long[(CIC_OUTPUT_WIDTH-1)-:16];
+assign q0_short = q0_long[(CIC_OUTPUT_WIDTH-1)-:16];
+// assign i0_short = i0_long;
+// assign q0_short = q0_long;
+
+// Output streaming
+
+wire [7:0] min_data;
+wire istx;
+
+reg dclk_delay, packet_trigger;
+always @(posedge sclk)
+begin
+	dclk_delay <= dclk;
+	packet_trigger <= (dclk && !dclk_delay) && en;
+end
+
+min_transmit_fsm #(
+	.N_DATA_BYTE(4)
+) min (
+	.i_clk(sclk),
+	.i_rst(rst),
+	.i_en(packet_trigger),
+	.i_id(8'h01),
+	.i_data({i0_short, q0_short}),
+	.o_istx(istx),
+	.o_data(min_data)
+);
+
+wire fifo_empty, fifo_full, is_transmitting;
+wire [7:0] fifo_data;
+reg pull_byte, pull_byte_delay, tx_wait = 0;
+
+always @(posedge sclk)
+begin
+	pull_byte_delay <= pull_byte;
+	if (!is_transmitting)
+	begin
+		if (!fifo_empty && !tx_wait)
+		begin
+			pull_byte <= 1;
+			tx_wait <= 1;
+		end
+		else 
+			pull_byte <= 0;
+	end
+	else
+		tx_wait <= 0;
+end
+
+fifo #(
+	.ADDR_WIDTH(6),
+	.DATA_WIDTH(8),
+	.OVERWRITE_OLD(1)
+) transmit_fifo (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_wr(istx),
+	.i_rd(pull_byte),
+	.i_data(min_data),
+	.o_empty(fifo_empty),
+	.o_full(fifo_full),
+	.o_data(fifo_data)
+);
+
+uart #(
+	.CLOCK_DIVIDE(166)
+) uart (
+	.clk(sclk),
+	.rst(rst),
+	.rx(i_RS232_RX),
+	.tx(o_RS232_TX),
+	.transmit(pull_byte_delay),
+	.is_transmitting(is_transmitting),
+	.tx_byte(fifo_data)
+);
+
+assign o_led_tx = is_transmitting;
+assign o_test[2] = pull_byte;
+assign o_test[3] = istx;
 
 endmodule
