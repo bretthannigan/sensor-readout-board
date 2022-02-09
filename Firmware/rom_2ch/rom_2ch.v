@@ -13,6 +13,7 @@
 
 `ifndef __ROM_2CH_INCLUDE__
 `define __ROM_2CH_INCLUDE__
+`endif
 
 module rom_2ch(i_clk, i_en, i_addr_a, i_addr_b, o_data_a, o_data_b);
     parameter ADDR_WIDTH = 9;

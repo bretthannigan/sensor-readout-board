@@ -32,9 +32,9 @@ module cic(i_clk, i_en, i_rst, i_data, o_data, o_clk);
     parameter DECIMATION_BITS = 5; // 'R', decimation ratio = 2^(DECIMATION_BITS)
     parameter REG_WIDTH = I_WIDTH + ORDER*DECIMATION_BITS;
     input i_clk, i_en, i_rst;
-    input [(I_WIDTH-1):0] i_data;
+    input signed [(I_WIDTH-1):0] i_data;
     output o_clk;
-    output [(REG_WIDTH-1):0] o_data;
+    output signed [(REG_WIDTH-1):0] o_data;
 
     wire dec_clk;
     wire [(DECIMATION_BITS-1):0] dec;

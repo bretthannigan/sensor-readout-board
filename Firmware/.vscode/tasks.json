@@ -19,7 +19,7 @@
             "label": "Run GTKWave",
             "type": "shell",
             "windows": {
-                "command": "cd '${fileDirname}' ; gtkwave out.vcd"
+                "command": "cd '${fileDirname}' ; C:\\Users\\bhannigan\\fpga\\gtkwave\\bin\\gtkwave.exe out.vcd"
             },
             "osx": {
                 "command": "cd '${fileDirname}' ; open -a /Applications/gtkwave.app out.vcd"

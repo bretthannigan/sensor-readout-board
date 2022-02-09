@@ -18,9 +18,9 @@ parser = argparse.ArgumentParser(description='Logging utility for MENRVA sensor 
 parser.add_argument('--port', dest='port', action='store', default="COM8", help='Serial port for readout board.')
 parser.add_argument('--logfile', dest='logfile', action='store', default=datetime.datetime.now().strftime("Log_%Y-%m-%dT%H%M%S.csv"), help='Custom log file name.')
 parser.add_argument('--plot', dest='plot', action='store_true', default=True, help='Turn on/off plotting data (default=on)')
-parser.add_argument('--mode', dest='mode', action='store', choices=['raw', 'iq', 'magphase', 'RCparallel', 'RCparallel'], default='RCseries', help='Impedance calculation mode.')
+parser.add_argument('--mode', dest='mode', action='store', choices=['raw', 'iq', 'magphase', 'RCseries', 'RCparallel'], default='RCseries', help='Impedance calculation mode.')
 parser.add_argument('--gain', dest='gain', action='store', type=float, choices=[1e-2, 1e-3, 1e-1, 1e-5], default=1e-3, help='Gain setting selected with readout board jumper.')
-parser.add_argument('--exc_amp', dest='excitation_amplitude', action='store', default=0.5, help='Excitation sine wave scaling factor.')
+parser.add_argument('--exc_amp', dest='excitation_amplitude', action='store', default=0.33, help='Excitation sine wave scaling factor.')
 args = parser.parse_args()
 
 class ReadSensor:

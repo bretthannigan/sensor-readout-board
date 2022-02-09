@@ -2,7 +2,7 @@
 `timescale 1ns/1ns
 `include "pll.v"
 `ifndef __SINE_LUT_INCLUDE__
-`include "../sine_lut/sine_lut.v"
+`include "../sine_lut/sine_lut_2ch.v"
 `endif
 `ifndef __COUNTER_MOD2_INCLUDE__
 `include "../counter_mod2/counter_mod2.v"
@@ -35,7 +35,7 @@ module top(
 
 	i_sclk,
 	i_sw_rst, i_sw_cal, i_sw_trig, i_sw_aux,
-	i_sd_a,	i_sd_b,
+	i_sd_a,	i_sd_b, i_sd_dval,
 	i_RS232_RX,
 
 	o_sclk,
@@ -46,37 +46,29 @@ module top(
 	o_adc_en_n,	o_adc_zero,	o_adc_cal, o_adc_rst,
 	o_RS232_TX
 );
+
+localparam DELAY_COMPENSATION_LENGTH_0 = 16;
+localparam DELAY_COMPENSATION_LENGTH_1 = 16;
 	
-input wire clk, i_sclk, i_sw_rst, i_sw_cal, i_sw_trig, i_sw_aux, i_sd_a, i_sd_b, i_RS232_RX;
+input wire clk, i_sclk, i_sw_rst, i_sw_cal, i_sw_trig, i_sw_aux, i_sd_a, i_sd_b, i_sd_dval, i_RS232_RX;
 output wire o_sclk, o_en, o_led_en, o_led_busy, o_led_tx, o_led_aux, o_dac, o_adc_en_n, o_adc_zero, o_adc_cal, o_adc_rst, o_RS232_TX;
 output wire [7:0] o_led;
 output wire [3:0] o_test;
 
-reg rst, en;
-wire sclk;
+wire rst, en;
+wire lclk, sclk;
 
-initial begin
-	en = 1;
-
-    o_led_busy = 0;
-    o_led_aux = 0;
-end
-
-always @(*) 
-begin
-	o_led_busy <= ~i_sw_cal;
-	o_led_aux <= ~i_sw_aux;
-end
+assign o_led_busy = ~i_sd_dval;
+assign o_led_aux = ~i_sd_dval;
 
 // Enable
+assign en = 1;
 assign o_led_en = en;
 assign o_en = en;
 assign o_adc_en_n = ~en;
 // Reset
 assign o_sclk = sclk;
 assign rst = ~i_sw_rst;
-
-assign sclk = clk25div[1];
 
 // Sampling clock generation
 
@@ -100,26 +92,32 @@ counter_mod2 #(
 	.o_data(clk25div)
 );
 
+assign sclk = clk25div[1]; // 6.375 MHz clock
+
 // Sine wave generator
 
-wire[10:0] phase;
-wire[15:0] sin;
-wire[15:0] cos;
+wire[10:0] phase0, phase1;
+wire signed [15:0] sin0, cos0, sin1, cos1;
 
-assign phase = clk25div[13:3];
+assign phase0 = clk25div[13:3];
+assign phase1 = clk25div[10:0];
 assign o_test[0] = sclk;
-assign o_test[1] = phase[10];
+assign o_test[1] = phase0[10];
+assign o_test[2] = phase1[10];
 
-sine_lut #(
+sine_lut_2ch #(
 	.I_WIDTH(11),
 	.O_WIDTH(16),
-	.LOAD_PATH("quarterwave_11_16_scaled.hex")
+	.LOAD_PATH("quarterwave_11_16.hex")
 ) sine_11_16 (
 	.i_clk(sclk),
 	.i_en(en),
-	.i_phase(phase),
-	.o_sin(sin),
-	.o_cos(cos)
+	.i_phase_a(phase0),
+	.i_phase_b(phase1),
+	.o_sin_a(sin0),
+	.o_cos_a(cos0),
+	.o_sin_b(sin1),
+	.o_cos_b(cos1)
 );
 
 // Sigma-delta DAC
@@ -130,61 +128,95 @@ mod2_dac #(
     .i_clk(sclk),
     .i_en(en),
     .i_rst(rst),
-    .i_data(sin),
+    .i_data((sin0 >>> 1) + (sin1 >>> 1)),
     .o_sd(o_dac)
 );
 
 // Delay line
 
-wire[15:0] sin_delay;
-wire[15:0] cos_delay;
+wire signed [15:0] sin0_delay, cos0_delay, sin1_delay, cos1_delay;
 
 shift #(
 	.WIDTH(16),
-	.LENGTH(3)
-) sin_delay_line (
+	.LENGTH(DELAY_COMPENSATION_LENGTH_0)
+) sin0_delay_line (
 	.i_clk(sclk),
 	.i_en(en),
 	.i_rst(rst),
-	.i_data(sin),
-	.o_par(sin_delay)
+	.i_data(sin0),
+	.o_ser(sin0_delay)
 );
 
 shift #(
 	.WIDTH(16),
-	.LENGTH(3)
-) cos_delay_line (
+	.LENGTH(DELAY_COMPENSATION_LENGTH_0)
+) cos0_delay_line (
 	.i_clk(sclk),
 	.i_en(en),
 	.i_rst(rst),
-	.i_data(cos),
-	.o_par(cos_delay)
+	.i_data(cos0),
+	.o_ser(cos0_delay)
+);
+
+shift #(
+	.WIDTH(16),
+	.LENGTH(DELAY_COMPENSATION_LENGTH_1)
+) sin1_delay_line (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(sin1),
+	.o_ser(sin1_delay)
+);
+
+shift #(
+	.WIDTH(16),
+	.LENGTH(DELAY_COMPENSATION_LENGTH_1)
+) cos1_delay_line (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(cos1),
+	.o_ser(cos1_delay)
 );
 
 // Phase-sensitive detector
 
-wire signed [15:0] i0, q0;
+wire signed [15:0] i0, q0, i1, q1;
 
 psd_mixer #(
 	.DATA_WIDTH(1),
-	.SIN_WIDTH(16)
-) psd (
+	.SIN_WIDTH(16),
+	.ONEBIT_TO_BIPOLAR(1)
+) psd0 (
 	.i_clk(sclk),
 	.i_en(en),
 	.i_rst(rst),
 	.i_data(i_sd_a),
-	.i_sin(sin_delay),
-	.i_cos(cos_delay),
+	.i_sin(sin0_delay),
+	.i_cos(cos0_delay),
 	.o_i(i0),
 	.o_q(q0)
 );
 
+psd_mixer #(
+	.DATA_WIDTH(1),
+	.SIN_WIDTH(16),
+	.ONEBIT_TO_BIPOLAR(1)
+) psd1 (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(i_sd_a),
+	.i_sin(sin1_delay),
+	.i_cos(cos1_delay),
+	.o_i(i1),
+	.o_q(q1)
+);
+
 localparam CIC_OUTPUT_WIDTH = 106;
 wire dclk;
-wire[(CIC_OUTPUT_WIDTH-1):0] i0_long;
-wire[(CIC_OUTPUT_WIDTH-1):0] q0_long;
-// wire[15:0] i0_long;
-// wire[15:0] q0_long;
+wire signed [(CIC_OUTPUT_WIDTH-1):0] i0_long, q0_long, i1_long, q1_long;
 
 // Decimation Filter
 
@@ -213,16 +245,50 @@ cic #(
 	.o_data(q0_long)
 );
 
-wire [15:0] i0_short, q0_short;
-assign i0_short = i0_long[(CIC_OUTPUT_WIDTH-1)-:16];
-assign q0_short = q0_long[(CIC_OUTPUT_WIDTH-1)-:16];
-// assign i0_short = i0_long;
-// assign q0_short = q0_long;
+cic #(
+	.I_WIDTH(16),
+	.ORDER(5),
+	.DECIMATION_BITS(18)
+) cic_i1 (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(i1),
+	.o_data(i1_long),
+);
+
+cic #(
+	.I_WIDTH(16),
+	.ORDER(5),
+	.DECIMATION_BITS(18)
+) cic_q1 (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(q1),
+	.o_data(q1_long)
+);
+
+assign o_led = q0_long[(CIC_OUTPUT_WIDTH-1)-:8]; // new, seems to fix bug?
+
+wire [15:0] i0_short, q0_short, i1_short, q1_short;
+assign i0_short = i0_long[(CIC_OUTPUT_WIDTH-2)-:16];
+assign q0_short = q0_long[(CIC_OUTPUT_WIDTH-2)-:16];
+assign i1_short = i1_long[(CIC_OUTPUT_WIDTH-2)-:16];
+assign q1_short = q1_long[(CIC_OUTPUT_WIDTH-2)-:16];
 
 // Output streaming
 
 wire [7:0] min_data;
 wire istx;
+
+reg[63:0] iq_buffer;
+
+// Pipeline buffer that solved issue of corrupted/noisy data being sent over serial.
+always @(posedge sclk)
+begin
+	iq_buffer <= {i0_short, q0_short, i1_long, q1_long};
+end
 
 reg dclk_delay, packet_trigger;
 always @(posedge sclk)
@@ -232,13 +298,13 @@ begin
 end
 
 min_transmit_fsm #(
-	.N_DATA_BYTE(4)
+	.N_DATA_BYTE(8)
 ) min (
 	.i_clk(sclk),
 	.i_rst(rst),
 	.i_en(packet_trigger),
 	.i_id(8'h01),
-	.i_data({i0_short, q0_short}),
+	.i_data(iq_buffer),
 	.o_istx(istx),
 	.o_data(min_data)
 );
@@ -280,6 +346,9 @@ fifo #(
 	.o_data(fifo_data)
 );
 
+localparam integer UART_BAUD_RATE =  9_600;
+localparam integer UART_CLOCK_DIVIDE = $ceil(25_500_000/(4*UART_BAUD_RATE));
+
 uart #(
 	.CLOCK_DIVIDE(166)
 ) uart (
@@ -293,7 +362,6 @@ uart #(
 );
 
 assign o_led_tx = is_transmitting;
-assign o_test[2] = pull_byte;
-assign o_test[3] = istx;
+assign o_test[3] = dclk;
 
 endmodule

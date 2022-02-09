@@ -36,25 +36,6 @@ cic #(
 always
 #10 clk = ~clk;
 
-// initial
-// begin
-//     clk = 0;
-//     rst = 1;
-//     en = 1;
-//     sd = 0;
-//     // Test 1: impulse response
-//     // o_data[1] = (D + S - 1)!/(D!*(S - 1)!) - S
-//     // Where D: decimation ratio, S: order
-//     // For D=4, S=5: o_data[1] = 0x00041
-//     #40 rst = 0;
-//     #990 sd = 1;
-//     #20 sd = 0;
-//     // Test 2: step response
-//     // S non-zero samples followed by constant sequence of D^S valued samples
-//     // For D=4, S=5: o_data[4] = 0x00400
-//     #1000 sd = 1;
-// end
-
 initial
 begin
     clk = 0;
@@ -66,12 +47,31 @@ begin
     // Where D: decimation ratio, S: order
     // For D=4, S=5: o_data[1] = 0x00041
     #40 rst = 0;
-    #990 sd = 8'h7f;
+    #990 sd = 1;
+    #20 sd = 0;
+    // Test 2: step response
+    // S non-zero samples followed by constant sequence of D^S valued samples
+    // For D=4, S=5: o_data[4] = 0x00400
+    #1000 sd = 1;
 end
+
+// initial
+// begin
+//     clk = 0;
+//     rst = 1;
+//     en = 1;
+//     sd = 0;
+//     // Test 1: impulse response
+//     // o_data[1] = (D + S - 1)!/(D!*(S - 1)!) - S
+//     // Where D: decimation ratio, S: order
+//     // For D=4, S=5: o_data[1] = 0x00041
+//     #40 rst = 0;
+//     #990 sd = 8'h7f;
+// end
 
 initial
 begin
-    #4000 $stop;
+    #6000 $stop;
 end
 
 initial

@@ -14,13 +14,15 @@
 module sine_lut_tb();
 
 reg clk, rst, en;
-reg [7:0] phase;
-wire [7:0] dout_sin, dout_cos;
+reg [10:0] phase;
+wire [15:0] dout_sin, dout_cos, sin2, cos2;
+wire [14:0] dout_sin2, dout_cos2;
 
 sine_lut #(
-    .I_WIDTH(8),
-    .O_WIDTH(8)
-) DUT (
+    .I_WIDTH(11),
+    .O_WIDTH(16),
+    .LOAD_PATH("quarterwave_11_16_5.hex")
+) DUT1 (
     .i_clk(clk),
     .i_rst(rst),
     .i_en(en),
@@ -29,29 +31,45 @@ sine_lut #(
     .o_cos(dout_cos)
 );
 
+sine_lut #(
+    .I_WIDTH(11),
+    .O_WIDTH(15),
+    .LOAD_PATH("quarterwave_11_15.hex")
+) DUT2 (
+    .i_clk(clk),
+    .i_rst(rst),
+    .i_en(en),
+    .i_phase(phase),
+    .o_sin(dout_sin2),
+    .o_cos(dout_cos2)
+);
+
+assign sin2 = {dout_sin2[14], dout_sin2};
+assign cos2 = {dout_cos2[14], dout_cos2};
+
 always
 #10 clk = ~clk;
 
 always 
-#40 phase = phase + 8'b1;
+#40 phase = phase + 11'd2;
 
 initial
 begin
     clk = 0;
     en = 1;
     rst = 0;
-    phase = 8'd0;
+    phase = 11'd0;
 end
 
 initial 
 begin
-    #10000 $stop;
+    #60000 $stop;
 end
 
 initial
 begin
     $dumpfile("out.vcd");
-    $dumpvars(0,DUT);
+    $dumpvars(0);
 end
  
 initial

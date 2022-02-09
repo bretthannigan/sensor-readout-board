@@ -98,17 +98,17 @@ module min_transmit_fsm(i_clk, i_rst, i_en, i_id, i_data, o_istx, o_data);
     end
     assign i_array[7+N_DATA_BYTE] = EOF;
 
-    initial begin
-        state_reg = {STATE_WIDTH{1'b0}};
-        state_next = {STATE_WIDTH{1'b0}};
-        latch_inputs = 0;
-        body_counter_en = 0;
-        body_counter_rst = 1;
-        crc_state_reg = 32'hFFFFFFFF;
-        shift_crc = 0;
-        o_istx = 0;
-        o_data = 8'h00;
-    end
+    // initial begin
+    //     state_reg = {STATE_WIDTH{1'b0}};
+    //     state_next = {STATE_WIDTH{1'b0}};
+    //     latch_inputs = 0;
+    //     body_counter_en = 0;
+    //     body_counter_rst = 1;
+    //     crc_state_reg = 32'hFFFFFFFF;
+    //     shift_crc = 0;
+    //     o_istx = 0;
+    //     o_data = 8'h00;
+    // end
 
     always @(posedge i_clk) begin
         if (i_rst) begin

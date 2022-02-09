@@ -32,6 +32,6 @@ module shift(i_clk, i_en, i_rst, i_data, o_ser, o_par);
             else
                 sreg <= {sreg[(LENGTH-1)*WIDTH-1:0], i_data};
     end
-    assign o_ser = sreg[LENGTH*WIDTH-1:(LENGTH-1)*WIDTH];
+    assign o_ser = sreg[(LENGTH*WIDTH-1):(LENGTH-1)*WIDTH];
     assign o_par = sreg;
 endmodule
