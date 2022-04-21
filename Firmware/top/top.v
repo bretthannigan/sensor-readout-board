@@ -1,7 +1,6 @@
-// 1st order sigma delta DAC sine wave generator.
 `timescale 1ns/1ns
 `include "pll.v"
-`ifndef __SINE_LUT_INCLUDE__
+`ifndef __SINE_LUT_2CH_INCLUDE__
 `include "../sine_lut/sine_lut_2ch.v"
 `endif
 `ifndef __COUNTER_MOD2_INCLUDE__
@@ -29,6 +28,11 @@
 `include "../min/min_transmit_fsm.v"
 `endif
 `include "../uart/osdvu/uart.v"
+
+// Options for synthesis
+
+`define _USE_DELAY_LINES_
+`define _USE_PRUNED_CIC_FILTERS_
 
 module top(
 	clk,
@@ -134,6 +138,8 @@ mod2_dac #(
 
 // Delay line
 
+`ifdef _USE_DELAY_LINES_
+
 wire signed [15:0] sin0_delay, cos0_delay, sin1_delay, cos1_delay;
 
 shift #(
@@ -180,7 +186,21 @@ shift #(
 	.o_ser(cos1_delay)
 );
 
-// Phase-sensitive detector
+`else
+
+// No delay line:
+reg signed [15:0] sin0_delay, cos0_delay, sin1_delay, cos1_delay;
+always @(posedge sclk)
+begin 
+	sin0_delay <= sin0;
+	cos0_delay <= cos0;
+	sin1_delay <= sin1;
+	cos1_delay <= cos1;
+end
+
+`endif
+
+// Phase-sensitive detectors
 
 wire signed [15:0] i0, q0, i1, q1;
 
@@ -214,15 +234,78 @@ psd_mixer #(
 	.o_q(q1)
 );
 
-localparam CIC_OUTPUT_WIDTH = 106;
+// Decimation Filter
+
+wire [15:0] i0_short, q0_short, i1_short, q1_short;
 wire dclk;
+
+`ifdef _USE_PRUNED_CIC_FILTERS_
+
+localparam CIC_OUTPUT_WIDTH = 17;
+localparam PRUNING_WIDTHS = {8'd17, 8'd19, 8'd20, 8'd21, 8'd32, 8'd64, 8'd70};
 wire signed [(CIC_OUTPUT_WIDTH-1):0] i0_long, q0_long, i1_long, q1_long;
 
-// Decimation Filter
+cic_pruned #(
+	.I_WIDTH(16),
+	.ORDER(3),
+	.DECIMATION_BITS(18),
+	.REG_WIDTHS(PRUNING_WIDTHS)
+) cic_i0 (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(i0),
+	.o_data(i0_long),
+	.o_clk(dclk)
+);
+
+cic_pruned #(
+	.I_WIDTH(16),
+	.ORDER(3),
+	.DECIMATION_BITS(18),
+	.REG_WIDTHS(PRUNING_WIDTHS)
+) cic_q0 (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(q0),
+	.o_data(q0_long)
+);
+
+cic_pruned #(
+	.I_WIDTH(16),
+	.ORDER(3),
+	.DECIMATION_BITS(18),
+	.REG_WIDTHS(PRUNING_WIDTHS)
+) cic_i1 (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(i1),
+	.o_data(i1_long)
+);
+
+cic_pruned #(
+	.I_WIDTH(16),
+	.ORDER(3),
+	.DECIMATION_BITS(18),
+	.REG_WIDTHS(PRUNING_WIDTHS)
+) cic_q1 (
+	.i_clk(sclk),
+	.i_en(en),
+	.i_rst(rst),
+	.i_data(q1),
+	.o_data(q1_long)
+);
+
+`else
+
+localparam CIC_OUTPUT_WIDTH = 70;
+wire signed [(CIC_OUTPUT_WIDTH-1):0] i0_long, q0_long, i1_long, q1_long;
 
 cic #(
 	.I_WIDTH(16),
-	.ORDER(5),
+	.ORDER(3),
 	.DECIMATION_BITS(18)
 ) cic_i0 (
 	.i_clk(sclk),
@@ -235,7 +318,7 @@ cic #(
 
 cic #(
 	.I_WIDTH(16),
-	.ORDER(5),
+	.ORDER(3),
 	.DECIMATION_BITS(18)
 ) cic_q0 (
 	.i_clk(sclk),
@@ -247,7 +330,7 @@ cic #(
 
 cic #(
 	.I_WIDTH(16),
-	.ORDER(5),
+	.ORDER(3),
 	.DECIMATION_BITS(18)
 ) cic_i1 (
 	.i_clk(sclk),
@@ -259,7 +342,7 @@ cic #(
 
 cic #(
 	.I_WIDTH(16),
-	.ORDER(5),
+	.ORDER(3),
 	.DECIMATION_BITS(18)
 ) cic_q1 (
 	.i_clk(sclk),
@@ -269,9 +352,10 @@ cic #(
 	.o_data(q1_long)
 );
 
+`endif
+
 assign o_led = q0_long[(CIC_OUTPUT_WIDTH-1)-:8]; // new, seems to fix bug?
 
-wire [15:0] i0_short, q0_short, i1_short, q1_short;
 assign i0_short = i0_long[(CIC_OUTPUT_WIDTH-2)-:16];
 assign q0_short = q0_long[(CIC_OUTPUT_WIDTH-2)-:16];
 assign i1_short = i1_long[(CIC_OUTPUT_WIDTH-2)-:16];
@@ -287,7 +371,7 @@ reg[63:0] iq_buffer;
 // Pipeline buffer that solved issue of corrupted/noisy data being sent over serial.
 always @(posedge sclk)
 begin
-	iq_buffer <= {i0_short, q0_short, i1_long, q1_long};
+	iq_buffer <= {i0_short, q0_short, i1_short, q1_short};
 end
 
 reg dclk_delay, packet_trigger;

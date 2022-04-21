@@ -1,0 +1,77 @@
+###############################################################################
+
+# iCEcube PCF
+
+# Version:            2012.09SP1.22498
+
+# File Generated:     2018-02-15 17:28
+
+# Family & Device:    iCE40HX8K
+
+# Package:            CT256
+
+###############################################################################
+
+### Global Clock
+
+set_io --warn-no-port clk   J3
+set_io o_en                 G1
+
+### Switch Inputs
+
+set_io i_sw_rst             P1
+set_io i_sw_cal             N3
+set_io i_sw_trig            M2
+set_io i_sw_aux             L3
+
+### ADC Inputs
+
+set_io i_sclk               H2
+set_io i_sd_a               J1
+set_io i_sd_b               F1
+set_io i_sd_dval            H1
+
+### UART (FTDI Channel B)
+
+set_io i_RS232_RX           B10
+set_io o_RS232_TX           B12
+set_io RTSn                 B13
+set_io CTSn                 A15
+set_io DTRn                 A16
+set_io DSRn                 B14
+set_io DCDn                 B15
+
+### Testing Outputs
+
+set_io o_test[0]            C16
+set_io o_test[1]            B16
+set_io o_test[2]            D16
+set_io o_test[3]            D14
+
+### LED Outputs
+
+set_io o_led[0]             B5
+set_io o_led[1]             B4
+set_io o_led[2]             A2
+set_io o_led[3]             A1
+set_io o_led[4]             C5
+set_io o_led[5]             C4
+set_io o_led[6]             B3
+set_io o_led[7]             C3
+
+set_io o_led_en             R1
+set_io o_led_busy           P2
+set_io o_led_tx             N2
+set_io o_led_aux            M1
+
+### DAC Outputs
+
+set_io o_dac                F2
+
+### ADC Outputs
+
+set_io o_adc_en_n           L1
+set_io o_adc_zero           K3
+set_io o_adc_cal            G2
+set_io o_adc_rst            K1
+set_io o_sclk               J2

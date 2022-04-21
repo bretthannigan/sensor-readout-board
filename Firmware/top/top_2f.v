@@ -1,7 +1,7 @@
 `timescale 1ns/1ns
 `include "pll.v"
-`ifndef __SINE_LUT_INCLUDE__
-`include "../sine_lut/sine_lut.v"
+`ifndef __SINE_LUT_2ch_INCLUDE__
+`include "../sine_lut/sine_lut_2ch.v"
 `endif
 `ifndef __COUNTER_MOD2_INCLUDE__
 `include "../counter_mod2/counter_mod2.v"
@@ -34,7 +34,7 @@
 `define _USE_DELAY_LINES_
 `define _USE_PRUNED_CIC_FILTERS_
 
-module top_1f(
+module top_2f(
 	clk,
 
 	i_sclk,
@@ -99,23 +99,28 @@ assign sclk = clk25div[1]; // 6.375 MHz clock
 
 // Sine wave generator
 
-wire[10:0] phase;
-wire signed [15:0] sin, cos;
+wire[10:0] phase0, phase1;
+wire signed [15:0] sin0, cos0, sin1, cos1;
 
-assign phase = clk25div[13:3];
+assign phase0 = clk25div[13:3];
+assign phase1 = clk25div[10:0];
 assign o_test[0] = sclk;
-assign o_test[1] = phase[10];
+// assign o_test[1] = phase0[10];
+// assign o_test[2] = phase1[10];
 
-sine_lut #(
+sine_lut_2ch #(
 	.I_WIDTH(11),
 	.O_WIDTH(16),
-	.LOAD_PATH("quarterwave_11_16.hex") // Can optimize this by removing leading zero MSBs and shifting.
+	.LOAD_PATH("quarterwave_11_16.hex")
 ) sine_11_16 (
 	.i_clk(sclk),
 	.i_en(en),
-	.i_phase(phase),
-	.o_sin(sin),
-	.o_cos(cos)
+	.i_phase_a(phase0),
+	.i_phase_b(phase1),
+	.o_sin_a(sin0),
+	.o_cos_a(cos0),
+	.o_sin_b(sin1),
+	.o_cos_b(cos1)
 );
 
 // Sigma-delta DAC
@@ -126,7 +131,7 @@ mod2_dac #(
     .i_clk(sclk),
     .i_en(en),
     .i_rst(rst),
-    .i_data(sin >>> 1),
+    .i_data((sin0 >>> 1) + (sin1 >>> 1)),
     .o_sd(o_dac)
 );
 
@@ -143,7 +148,7 @@ shift #(
 	.i_clk(sclk),
 	.i_en(en),
 	.i_rst(rst),
-	.i_data(sin),
+	.i_data(sin0),
 	.o_ser(sin_delay)
 );
 
@@ -154,7 +159,7 @@ shift #(
 	.i_clk(sclk),
 	.i_en(en),
 	.i_rst(rst),
-	.i_data(cos),
+	.i_data(cos0),
 	.o_ser(cos_delay)
 );
 
@@ -164,8 +169,8 @@ shift #(
 reg signed [15:0] sin_delay, cos_delay;
 always @(posedge sclk)
 begin 
-	sin_delay <= sin;
-	cos_delay <= cos;
+	sin_delay <= sin0;
+	cos_delay <= cos0;
 end
 
 `endif

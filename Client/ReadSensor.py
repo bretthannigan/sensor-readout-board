@@ -8,6 +8,7 @@ import matplotlib.animation as animation
 from time import sleep
 from collections import deque
 import numpy as np
+import threading
 
 import PollMIN
 import RepeatedTimer
@@ -25,19 +26,27 @@ args = parser.parse_args()
 
 class ReadSensor:
 
-    __version__ = '0.1'
+    __version__ = '0.2'
+    __board_rev__ = 'B'
     UPDATE_PERIOD = 1
     dtype = [('Timestamp', (np.str_, 24)), ('Ch0', np.double), ('Ch1', np.double), ('Ch2', np.double), ('Ch3', np.double)]
-    excitation_frequency = 1556.0 # Hz
+    excitation_frequency = np.array([1556.0, 6224.0])  # Hz
+    lock = threading.Lock()
 
     def __init__(self, port):
+        self.splash()
         self.port = port
-        sys.stdout.write('MENRVA Sensor Readout Client v' + self.__version__ + '\n')
-        sys.stdout.write('Listening on port ' + args.port + '\n')
-        self.x_plot = deque(maxlen=50)
-        self.y_plot = deque(maxlen=50)
+        sys.stdout.write('Listening on port: ' + args.port + '\n')
+        self.x_plot = deque(maxlen=100)
+        self.y_plot = deque(maxlen=100)
         self.initialized = False
-        
+
+    def splash(self):
+        sys.stdout.write('\n')
+        with open('ETH.txt', 'r') as f:
+            sys.stdout.write(f.read())
+        sys.stdout.write(' BMHT Sensor Readout Client v' + self.__version__ + ' (board revision ' + self.__board_rev__ + ')' '\n\n')
+
     def start(self):
         self.rx_q = queue.Queue(1024)
         self.min = PollMIN.PollMIN(self.port, self.rx_q)
@@ -47,28 +56,34 @@ class ReadSensor:
             self.dtype = [('Timestamp', (np.str_, 24)), ('i_0', np.int16), ('q_0', np.int16), ('i_1', np.int16), ('q_1', np.int16), ('i_2', np.int16), ('q_2', np.int16), ('i_3', np.int16), ('q_3', np.int16)]
             self.fmt = ['%s', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i']
             self.ylabel = ['Ch0 I (counts)', 'Ch0 Q (counts)', 'Ch1 I (counts)', 'Ch1 Q (counts)', 'Ch2 I (counts)', 'Ch2 Q (counts)', 'Ch3 I (counts)', 'Ch3 Q (counts)']
+            self.dfunc = self._process_raw
         elif args.mode == 'iq':
             self.dtype = [('Timestamp', (np.str_, 24)), ('i_0', np.double), ('q_0', np.double), ('i_1', np.double), ('q_1', np.double), ('i_2', np.double), ('q_2', np.double), ('i_3', np.double), ('q_3', np.double)]
             self.fmt = ['%s', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f']
             self.ylabel = ['Ch0 I', 'Ch0 Q', 'Ch1 I', 'Ch1 Q', 'Ch2 I', 'Ch2 Q', 'Ch3 I', 'Ch3 Q']
+            self.dfunc = self._process_iq
         elif args.mode == 'magphase':
             self.dtype = [('Timestamp', (np.str_, 24)), ('mag_0', np.double), ('phase_0', np.double), ('mag_1', np.double), ('phase_1', np.double), ('mag_2', np.double), ('phase_2', np.double), ('mag_3', np.double), ('phase_3', np.double)]
             self.fmt = ['%s', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f']
             self.ylabel = ['Ch0 mag. (dB)', 'Ch0 phase (deg)', 'Ch1 mag. (dB)', 'Ch1 phase (deg)', 'Ch2 mag. (dB)', 'Ch2 phase (deg)', 'Ch3 mag. (dB)', 'Ch3 phase (deg)']
+            self.dfunc = self._process_magphase
         elif args.mode == 'RCseries':
             self.dtype = [('Timestamp', (np.str_, 24)), ('R_0', np.double), ('C_0', np.double), ('R_1', np.double), ('C_1', np.double), ('R_2', np.double), ('C_2', np.double), ('R_3', np.double), ('C_3', np.double)]
             self.fmt = ['%s', '%e', '%e', '%e', '%e', '%e', '%e', '%e', '%e']
             self.ylabel = ['Ch0 R (ohm)', 'Ch0 C (F)', 'Ch1 R (ohm)', 'Ch1 C (F)', 'Ch2 R (ohm)', 'Ch2 C (F)', 'Ch3 R (ohm)', 'Ch3 C (F)']
+            self.dfunc = self._process_rcseries
         elif args.mode == 'RCparallel':
             self.dtype = [('Timestamp', (np.str_, 24)), ('R_0', np.double), ('C_0', np.double), ('R_1', np.double), ('C_1', np.double), ('R_2', np.double), ('C_2', np.double), ('R_3', np.double), ('C_3', np.double)]
             self.fmt = ['%s', '%e', '%e', '%e', '%e', '%e', '%e', '%e', '%e']
             self.ylabel = ['Ch0 R (ohm)', 'Ch0 C (F)', 'Ch1 R (ohm)', 'Ch1 C (F)', 'Ch2 R (ohm)', 'Ch2 C (F)', 'Ch3 R (ohm)', 'Ch3 C (F)']
+            self.dfunc = self._process_rcparallel
 
     def _init_ch(self, hdr, n):
         self.dtype = self.dtype[0:(n+1)]
         self.fmt = self.fmt[0:(n+1)]
         self.n_ch = n//2
         self.initialized = True
+        sys.stdout.write('Detected ' + str(self.n_ch) + ' channels.\n')
 
     def _init_logfile(self, hdr):
         log_header = self.dtype[0][0]
@@ -110,51 +125,67 @@ class ReadSensor:
         dt = np.dtype(np.int16)
         dt = dt.newbyteorder('>')
         payload = np.frombuffer(payload, dtype=dt)
-        if mode=="raw":
-            return payload
-        MAX_INPUT_VALUE = np.iinfo(dt).max # Maximum value of input (16-bit integer).
+        return self.dfunc(payload)
+        
+    @staticmethod
+    def _process_raw(payload):
+        return payload
+
+    @staticmethod
+    def _process_iq(payload):
+        MAX_INPUT_VALUE = np.iinfo(np.dtype(np.int16)).max # Maximum value of input (16-bit integer).
         iq = payload/((MAX_INPUT_VALUE//2)*args.excitation_amplitude*args.gain)
-        if mode=="iq":
-            return iq
-        elif mode=="magphase":
-            iq_split = np.split(iq, len(iq)//2)
-            iq_complex = np.array([np.complex(*x) for x in iq_split])
-            mag = np.abs(iq_complex)
-            phase = np.angle(iq_complex)
-            mag_phase = np.empty((mag.size + phase.size))
-            mag_phase[0::2] = 20.0*np.log10(2.0*mag)
-            mag_phase[1::2] = -2.0*(180.0/np.pi)*phase
-            return mag_phase
-        elif mode=="RCseries":
-            r = iq[0::2]
-            c = -1.0/(2.0*np.pi*self.excitation_frequency*iq[1::2])
-            rc = np.empty((r.size + c.size))
-            rc[0::2] = r
-            rc[1::2] = c
-            return rc
-        elif mode=="RCparallel":
-            i2q2_split = np.sum(np.split(iq**2, len(iq)//2), axis=1)
-            r = i2q2_split/iq[0::2]
-            c = -1.0*iq[1::2]/(2.0*np.pi*self.excitation_frequency*i2q2_split)
-            rc = np.empty((r.size + c.size))
-            rc[0::2] = r
-            rc[1::2] = c
-            return rc
-        else:
-            pass
+        return iq
+
+    @staticmethod
+    def _process_magphase(payload):
+        iq = ReadSensor._process_iq(payload)
+        iq_split = np.split(iq, len(iq)//2)
+        iq_complex = np.array([np.complex(*x) for x in iq_split])
+        mag = np.abs(iq_complex)
+        phase = np.angle(iq_complex)
+        mag_phase = np.empty((mag.size + phase.size))
+        mag_phase[0::2] = 20.0*np.log10(2.0*mag)
+        mag_phase[1::2] = -2.0*(180.0/np.pi)*phase
+        return mag_phase
+
+    def _process_rcseries(self, payload):
+        iq = ReadSensor._process_iq(payload)
+        r = iq[0::2]
+        c = -1.0/(2.0*np.pi*self.excitation_frequency*iq[1::2])
+        rc = np.empty((r.size + c.size))
+        rc[0::2] = r
+        rc[1::2] = c
+        return rc
+
+    def _process_rcparallel(self, payload):
+        iq = self._process_iq(payload)
+        i2q2_split = np.sum(np.split(iq**2, len(iq)//2), axis=1)
+        r = i2q2_split/iq[0::2]
+        c = -1.0*iq[1::2]/(2.0*np.pi*self.excitation_frequency*i2q2_split)
+        rc = np.empty((r.size + c.size))
+        rc[0::2] = r
+        rc[1::2] = c
+        return rc
 
     def _update_plot_buffer(self, buf):
+        self.lock.acquire()
         for i in range(len(buf)):
             self.x_plot.append(buf[i]['Timestamp'])
             self.y_plot.append([buf[i][j+1] for j in range(self.n_ch*2)])
+        self.lock.release()
 
     def _update_plot(self, i):
-        for i in range(self.n_ch*2):
-            self.ax[i].clear()
-            self.ax[i].plot(np.asarray(self.x_plot), np.asarray(self.y_plot)[:,i])
-            self.ax[i].set_xticks(self.ax[i].get_xticks()[::5])
-            self.ax[i].set_ylabel(self.ylabel[i])
+        self.lock.acquire(timeout=2)
+        for i in range(self.n_ch):
+            for j in range(2):
+                self.ax[i][j].clear()
+                self.ax[i][j].plot(np.asarray(self.x_plot), np.asarray(self.y_plot)[:,2*i+j]) # Need thread lock on x_plot, y_plot
+                self.ax[i][j].set_xticks(self.ax[i][j].get_xticks()[::5])
+                self.ax[i][j].set_ylabel(self.ylabel[2*i+j])
+        self.lock.release()
         self.fig.autofmt_xdate(rotation=45)
+        #self.fig.fmt_xdate()
         plt.subplots_adjust(bottom=0.4)
 
     def animate(self):
