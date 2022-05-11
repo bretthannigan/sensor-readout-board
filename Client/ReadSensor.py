@@ -30,7 +30,8 @@ class ReadSensor:
     __board_rev__ = 'B'
     UPDATE_PERIOD = 1
     dtype = [('Timestamp', (np.str_, 24)), ('Ch0', np.double), ('Ch1', np.double), ('Ch2', np.double), ('Ch3', np.double)]
-    excitation_frequency = np.array([1556.0, 6224.0])  # Hz
+    #excitation_frequency = np.array([1556.0, 6224.0])  # Hz
+    excitation_frequency = np.array([1556.0])  # Hz
     lock = threading.Lock()
 
     def __init__(self, port):
@@ -55,27 +56,32 @@ class ReadSensor:
         if args.mode == 'raw':
             self.dtype = [('Timestamp', (np.str_, 24)), ('i_0', np.int16), ('q_0', np.int16), ('i_1', np.int16), ('q_1', np.int16), ('i_2', np.int16), ('q_2', np.int16), ('i_3', np.int16), ('q_3', np.int16)]
             self.fmt = ['%s', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i']
-            self.ylabel = ['Ch0 I (counts)', 'Ch0 Q (counts)', 'Ch1 I (counts)', 'Ch1 Q (counts)', 'Ch2 I (counts)', 'Ch2 Q (counts)', 'Ch3 I (counts)', 'Ch3 Q (counts)']
+            self.ylabel = ['Ch0 I', 'Ch0 Q', 'Ch1 I', 'Ch1 Q', 'Ch2 I', 'Ch2 Q', 'Ch3 I', 'Ch3 Q']
+            self.unit = ['counts', 'counts', 'counts', 'counts', 'counts', 'counts', 'counts', 'counts']
             self.dfunc = self._process_raw
         elif args.mode == 'iq':
             self.dtype = [('Timestamp', (np.str_, 24)), ('i_0', np.double), ('q_0', np.double), ('i_1', np.double), ('q_1', np.double), ('i_2', np.double), ('q_2', np.double), ('i_3', np.double), ('q_3', np.double)]
             self.fmt = ['%s', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f']
             self.ylabel = ['Ch0 I', 'Ch0 Q', 'Ch1 I', 'Ch1 Q', 'Ch2 I', 'Ch2 Q', 'Ch3 I', 'Ch3 Q']
+            self.unit = ['', '', '', '', '', '', '', '']
             self.dfunc = self._process_iq
         elif args.mode == 'magphase':
             self.dtype = [('Timestamp', (np.str_, 24)), ('mag_0', np.double), ('phase_0', np.double), ('mag_1', np.double), ('phase_1', np.double), ('mag_2', np.double), ('phase_2', np.double), ('mag_3', np.double), ('phase_3', np.double)]
             self.fmt = ['%s', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f']
-            self.ylabel = ['Ch0 mag. (dB)', 'Ch0 phase (deg)', 'Ch1 mag. (dB)', 'Ch1 phase (deg)', 'Ch2 mag. (dB)', 'Ch2 phase (deg)', 'Ch3 mag. (dB)', 'Ch3 phase (deg)']
+            self.ylabel = ['Ch0 mag.', 'Ch0 phase', 'Ch1 mag.', 'Ch1 phase', 'Ch2 mag.', 'Ch2 phase', 'Ch3 mag.', 'Ch3 phase']
+            self.unit = ['dB', 'deg', 'dB', 'deg', 'dB', 'deg', 'dB', 'deg']
             self.dfunc = self._process_magphase
         elif args.mode == 'RCseries':
             self.dtype = [('Timestamp', (np.str_, 24)), ('R_0', np.double), ('C_0', np.double), ('R_1', np.double), ('C_1', np.double), ('R_2', np.double), ('C_2', np.double), ('R_3', np.double), ('C_3', np.double)]
             self.fmt = ['%s', '%e', '%e', '%e', '%e', '%e', '%e', '%e', '%e']
-            self.ylabel = ['Ch0 R (ohm)', 'Ch0 C (F)', 'Ch1 R (ohm)', 'Ch1 C (F)', 'Ch2 R (ohm)', 'Ch2 C (F)', 'Ch3 R (ohm)', 'Ch3 C (F)']
+            self.ylabel = ['Ch0 R', 'Ch0 C', 'Ch1 R', 'Ch1 C', 'Ch2 R', 'Ch2 C', 'Ch3 R', 'Ch3 C']
+            self.unit = ['ohm', 'F', 'ohm', 'F', 'ohm', 'F', 'ohm', 'F']
             self.dfunc = self._process_rcseries
         elif args.mode == 'RCparallel':
             self.dtype = [('Timestamp', (np.str_, 24)), ('R_0', np.double), ('C_0', np.double), ('R_1', np.double), ('C_1', np.double), ('R_2', np.double), ('C_2', np.double), ('R_3', np.double), ('C_3', np.double)]
             self.fmt = ['%s', '%e', '%e', '%e', '%e', '%e', '%e', '%e', '%e']
-            self.ylabel = ['Ch0 R (ohm)', 'Ch0 C (F)', 'Ch1 R (ohm)', 'Ch1 C (F)', 'Ch2 R (ohm)', 'Ch2 C (F)', 'Ch3 R (ohm)', 'Ch3 C (F)']
+            self.ylabel = ['Ch0 R', 'Ch0 C', 'Ch1 R', 'Ch1 C', 'Ch2 R', 'Ch2 C', 'Ch3 R', 'Ch3 C']
+            self.unit = ['ohm', 'F', 'ohm', 'F', 'ohm', 'F', 'ohm', 'F']
             self.dfunc = self._process_rcparallel
 
     def _init_ch(self, hdr, n):
@@ -95,7 +101,7 @@ class ReadSensor:
         
     def update(self):
         n = self.rx_q.qsize()
-        print(n)
+        sys.stdout.write('[' + str(n) + ']')
         i = 0
         buffer = np.zeros(n, dtype=self.dtype)
         for i in range(n):
@@ -112,6 +118,9 @@ class ReadSensor:
             buffer[i] = (timestamp.strftime("%Y-%m-%dT%H%M%S.%f"), *payload)
             self.rx_q.task_done()
         #print(buffer)
+        for i in range(2*self.n_ch):
+            sys.stdout.write((self.ylabel[i] + "{:.2e}").format(np.average([x[i+1] for _, x in enumerate(buffer)])))
+        sys.stdout.write('\n')
         if args.logfile and self.initialized:
             self._update_logfile(buffer)
         if args.plot and self.initialized:
@@ -178,11 +187,15 @@ class ReadSensor:
     def _update_plot(self, i):
         self.lock.acquire(timeout=2)
         for i in range(self.n_ch):
+            if self.n_ch==1:
+                ch_ax = self.ax # in case self.ax is a 1-D array.
+            else:
+                ch_ax = self.ax[i]
             for j in range(2):
-                self.ax[i][j].clear()
-                self.ax[i][j].plot(np.asarray(self.x_plot), np.asarray(self.y_plot)[:,2*i+j]) # Need thread lock on x_plot, y_plot
-                self.ax[i][j].set_xticks(self.ax[i][j].get_xticks()[::5])
-                self.ax[i][j].set_ylabel(self.ylabel[2*i+j])
+                ch_ax[j].clear()
+                ch_ax[j].plot(np.asarray(self.x_plot), np.asarray(self.y_plot)[:,2*i+j]) # Need thread lock on x_plot, y_plot
+                ch_ax[j].set_xticks(ch_ax[j].get_xticks()[::5])
+                ch_ax[j].set_ylabel(self.ylabel[2*i+j] + " (" + self.unit[2*i+j] + ")")
         self.lock.release()
         self.fig.autofmt_xdate(rotation=45)
         #self.fig.fmt_xdate()
