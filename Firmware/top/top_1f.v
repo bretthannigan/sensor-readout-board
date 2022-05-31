@@ -51,7 +51,7 @@ module top_1f(
 	o_RS232_TX
 );
 
-localparam DELAY_COMPENSATION_LENGTH = 16;
+localparam DELAY_COMPENSATION_LENGTH = 17;
 	
 input wire clk, i_sclk, i_sw_rst, i_sw_cal, i_sw_trig, i_sw_aux, i_sd_a, i_sd_b, i_sd_dval, i_RS232_RX;
 output wire o_sclk, o_en, o_led_en, o_led_busy, o_led_tx, o_led_aux, o_dac, o_adc_en_n, o_adc_zero, o_adc_cal, o_adc_rst, o_RS232_TX;
@@ -102,9 +102,9 @@ assign sclk = clk25div[1]; // 6.375 MHz clock
 wire[10:0] phase;
 wire signed [15:0] sin, cos;
 
-assign phase = {clk25div[9:0], 1'b0};
+assign phase = {clk25div[8:0], 2'b0}; //clk25div[13:3];//{clk25div[10:0], 2'b0};//; //{clk25div[9:0], 1'b0};
 assign o_test[0] = sclk;
-assign o_test[1] = phase[10];
+//assign o_test[1] = phase[10];
 
 sine_lut #(
 	.I_WIDTH(11),
@@ -146,6 +146,8 @@ shift #(
 	.i_data(sin),
 	.o_ser(sin_delay)
 );
+
+assign o_test[1] = sin_delay[15];
 
 shift #(
 	.WIDTH(16),
@@ -284,13 +286,15 @@ begin
 	packet_trigger <= (dclk && !dclk_delay) && en;
 end
 
+wire id = {i_sw_trig, 7'b0};
+
 min_transmit_fsm #(
 	.N_DATA_BYTE(4)
 ) min (
 	.i_clk(sclk),
 	.i_rst(rst),
 	.i_en(packet_trigger),
-	.i_id(8'h01),
+	.i_id(id),
 	.i_data(iq_buffer),
 	.o_istx(istx),
 	.o_data(min_data)

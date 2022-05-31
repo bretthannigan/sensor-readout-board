@@ -10,6 +10,7 @@ from collections import deque
 import numpy as np
 import threading
 
+from SensorDataParser import *
 import PollMIN
 import RepeatedTimer
 import argparse
@@ -19,8 +20,8 @@ parser = argparse.ArgumentParser(description='Logging utility for MENRVA sensor 
 parser.add_argument('--port', dest='port', action='store', default="COM8", help='Serial port for readout board.')
 parser.add_argument('--logfile', dest='logfile', action='store', default=datetime.datetime.now().strftime("Log_%Y-%m-%dT%H%M%S.csv"), help='Custom log file name.')
 parser.add_argument('--plot', dest='plot', action='store_true', default=True, help='Turn on/off plotting data (default=on)')
-parser.add_argument('--mode', dest='mode', action='store', choices=['raw', 'iq', 'magphase', 'RCseries', 'RCparallel'], default='RCseries', help='Impedance calculation mode.')
-parser.add_argument('--gain', dest='gain', action='store', type=float, choices=[1e-2, 1e-3, 1e-1, 1e-5], default=1e-3, help='Gain setting selected with readout board jumper.')
+parser.add_argument('--mode', dest='mode', action='store', choices=['raw', 'iq', 'magphase', 'RCseries', 'RCparallel'], default='RCparallel', help='Impedance calculation mode.')
+parser.add_argument('--gain', dest='gain', action='store', type=float, choices=[1e-2, 1e-3, 1e-1, 1e-5], default=1e-4, help='Gain setting selected with readout board jumper.')
 parser.add_argument('--exc_amp', dest='excitation_amplitude', action='store', default=0.33, help='Excitation sine wave scaling factor.')
 args = parser.parse_args()
 
@@ -30,14 +31,15 @@ class ReadSensor:
     __board_rev__ = 'B'
     UPDATE_PERIOD = 1
     dtype = [('Timestamp', (np.str_, 24)), ('Ch0', np.double), ('Ch1', np.double), ('Ch2', np.double), ('Ch3', np.double)]
-    #excitation_frequency = np.array([1556.0, 6224.0])  # Hz
-    excitation_frequency = np.array([1556.0])  # Hz
+    #excitation_frequency = np.array([1556.0, 3113.0, 6226.0, 12451.0, 24902.0, 49805.0, 99609.0])  # Hz
+    #excitation_frequency = np.array([49805.0])  # Hz
+    excitation_frequency = np.array([49805.0])  # Hz
     lock = threading.Lock()
 
     def __init__(self, port):
         self.splash()
         self.port = port
-        sys.stdout.write('Listening on port: ' + args.port + '\n')
+        sys.stdout.write('\t=====Listening on port: ' + args.port + '.=====\n')
         self.x_plot = deque(maxlen=100)
         self.y_plot = deque(maxlen=100)
         self.initialized = False
@@ -53,73 +55,51 @@ class ReadSensor:
         self.min = PollMIN.PollMIN(self.port, self.rx_q)
         self.min.start()
         self.update_timer = RepeatedTimer.RepeatedTimer(self.UPDATE_PERIOD, self.update)
-        if args.mode == 'raw':
-            self.dtype = [('Timestamp', (np.str_, 24)), ('i_0', np.int16), ('q_0', np.int16), ('i_1', np.int16), ('q_1', np.int16), ('i_2', np.int16), ('q_2', np.int16), ('i_3', np.int16), ('q_3', np.int16)]
-            self.fmt = ['%s', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i']
-            self.ylabel = ['Ch0 I', 'Ch0 Q', 'Ch1 I', 'Ch1 Q', 'Ch2 I', 'Ch2 Q', 'Ch3 I', 'Ch3 Q']
-            self.unit = ['counts', 'counts', 'counts', 'counts', 'counts', 'counts', 'counts', 'counts']
-            self.dfunc = self._process_raw
-        elif args.mode == 'iq':
-            self.dtype = [('Timestamp', (np.str_, 24)), ('i_0', np.double), ('q_0', np.double), ('i_1', np.double), ('q_1', np.double), ('i_2', np.double), ('q_2', np.double), ('i_3', np.double), ('q_3', np.double)]
-            self.fmt = ['%s', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f']
-            self.ylabel = ['Ch0 I', 'Ch0 Q', 'Ch1 I', 'Ch1 Q', 'Ch2 I', 'Ch2 Q', 'Ch3 I', 'Ch3 Q']
-            self.unit = ['', '', '', '', '', '', '', '']
-            self.dfunc = self._process_iq
-        elif args.mode == 'magphase':
-            self.dtype = [('Timestamp', (np.str_, 24)), ('mag_0', np.double), ('phase_0', np.double), ('mag_1', np.double), ('phase_1', np.double), ('mag_2', np.double), ('phase_2', np.double), ('mag_3', np.double), ('phase_3', np.double)]
-            self.fmt = ['%s', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%f']
-            self.ylabel = ['Ch0 mag.', 'Ch0 phase', 'Ch1 mag.', 'Ch1 phase', 'Ch2 mag.', 'Ch2 phase', 'Ch3 mag.', 'Ch3 phase']
-            self.unit = ['dB', 'deg', 'dB', 'deg', 'dB', 'deg', 'dB', 'deg']
-            self.dfunc = self._process_magphase
-        elif args.mode == 'RCseries':
-            self.dtype = [('Timestamp', (np.str_, 24)), ('R_0', np.double), ('C_0', np.double), ('R_1', np.double), ('C_1', np.double), ('R_2', np.double), ('C_2', np.double), ('R_3', np.double), ('C_3', np.double)]
-            self.fmt = ['%s', '%e', '%e', '%e', '%e', '%e', '%e', '%e', '%e']
-            self.ylabel = ['Ch0 R', 'Ch0 C', 'Ch1 R', 'Ch1 C', 'Ch2 R', 'Ch2 C', 'Ch3 R', 'Ch3 C']
-            self.unit = ['ohm', 'F', 'ohm', 'F', 'ohm', 'F', 'ohm', 'F']
-            self.dfunc = self._process_rcseries
-        elif args.mode == 'RCparallel':
-            self.dtype = [('Timestamp', (np.str_, 24)), ('R_0', np.double), ('C_0', np.double), ('R_1', np.double), ('C_1', np.double), ('R_2', np.double), ('C_2', np.double), ('R_3', np.double), ('C_3', np.double)]
-            self.fmt = ['%s', '%e', '%e', '%e', '%e', '%e', '%e', '%e', '%e']
-            self.ylabel = ['Ch0 R', 'Ch0 C', 'Ch1 R', 'Ch1 C', 'Ch2 R', 'Ch2 C', 'Ch3 R', 'Ch3 C']
-            self.unit = ['ohm', 'F', 'ohm', 'F', 'ohm', 'F', 'ohm', 'F']
-            self.dfunc = self._process_rcparallel
 
     def _init_ch(self, hdr, n):
-        self.dtype = self.dtype[0:(n+1)]
-        self.fmt = self.fmt[0:(n+1)]
-        self.n_ch = n//2
+        if args.mode == 'raw':
+            self.parser = SensorDataParserRaw(n, args.excitation_amplitude, self.excitation_frequency, args.gain)
+        elif args.mode == 'iq':
+            self.parser = SensorDataParserIQ(n, args.excitation_amplitude, self.excitation_frequency, args.gain)
+        elif args.mode == 'magphase':
+            self.parser = SensorDataParserMagPhase(n, args.excitation_amplitude, self.excitation_frequency, args.gain)
+        elif args.mode == 'RCseries':
+            self.parser = SensorDataParserRCSeries(n, args.excitation_amplitude, self.excitation_frequency, args.gain)
+        elif args.mode == 'RCparallel':
+            self.parser = SensorDataParserRCParallel(n, args.excitation_amplitude, self.excitation_frequency, args.gain)
         self.initialized = True
-        sys.stdout.write('Detected ' + str(self.n_ch) + ' channels.\n')
+        sys.stdout.write('\t=====Detected ' + str(n) + ' channel(s).=====\n')
 
     def _init_logfile(self, hdr):
-        log_header = self.dtype[0][0]
-        for i in range(self.n_ch*2):
-            log_header = log_header + ',' + self.dtype[i+1][0]
+        log_header = self.parser.dtype[0][0]
+        for i in range(self.parser.n_ch*2):
+            log_header = log_header + ',' + self.parser.dtype[i+1][0]
         log_header = log_header + '\n'
         with open(args.logfile, 'xt') as f:
             f.write(log_header)
         
     def update(self):
         n = self.rx_q.qsize()
-        sys.stdout.write('[' + str(n) + ']')
         i = 0
-        buffer = np.zeros(n, dtype=self.dtype)
+        if self.initialized:
+            buffer = np.zeros(n, dtype=self.parser.dtype)
         for i in range(n):
             item = self.rx_q.get_nowait()
             timestamp = item[0]
             if not self.initialized:
                 header = item[1].min_id
-                n_packet = len(item[1].payload)//2
+                n_packet = len(item[1].payload)//4
                 self._init_ch(header, n_packet)
+                buffer = np.zeros(n, dtype=self.parser.dtype)
                 if args.logfile:
                     self._init_logfile(header)
-                    buffer = np.zeros(n, dtype=self.dtype)
             payload = self._process_payload(item[1].payload, mode=args.mode)
             buffer[i] = (timestamp.strftime("%Y-%m-%dT%H%M%S.%f"), *payload)
             self.rx_q.task_done()
         #print(buffer)
-        for i in range(2*self.n_ch):
-            sys.stdout.write((self.ylabel[i] + "{:.2e}").format(np.average([x[i+1] for _, x in enumerate(buffer)])))
+        sys.stdout.write('[' + str(n) + ']')
+        for i in range(2*self.parser.n_ch):
+            sys.stdout.write(("\t" + self.parser.ylabel[i] + ": {:10.5e} " + self.parser.unit[i]).format(np.average([x[i+1] for _, x in enumerate(buffer)])))
         sys.stdout.write('\n')
         if args.logfile and self.initialized:
             self._update_logfile(buffer)
@@ -128,66 +108,25 @@ class ReadSensor:
 
     def _update_logfile(self, buf):
         with open(args.logfile, 'a') as f:
-            np.savetxt(f, buf, delimiter=',', fmt=self.fmt)
+            np.savetxt(f, buf, delimiter=',', fmt=self.parser.fmt_np)
             
     def _process_payload(self, payload, mode="iq"):
         dt = np.dtype(np.int16)
         dt = dt.newbyteorder('>')
         payload = np.frombuffer(payload, dtype=dt)
-        return self.dfunc(payload)
-        
-    @staticmethod
-    def _process_raw(payload):
-        return payload
-
-    @staticmethod
-    def _process_iq(payload):
-        MAX_INPUT_VALUE = np.iinfo(np.dtype(np.int16)).max # Maximum value of input (16-bit integer).
-        iq = payload/((MAX_INPUT_VALUE//2)*args.excitation_amplitude*args.gain)
-        return iq
-
-    @staticmethod
-    def _process_magphase(payload):
-        iq = ReadSensor._process_iq(payload)
-        iq_split = np.split(iq, len(iq)//2)
-        iq_complex = np.array([np.complex(*x) for x in iq_split])
-        mag = np.abs(iq_complex)
-        phase = np.angle(iq_complex)
-        mag_phase = np.empty((mag.size + phase.size))
-        mag_phase[0::2] = 20.0*np.log10(2.0*mag)
-        mag_phase[1::2] = -2.0*(180.0/np.pi)*phase
-        return mag_phase
-
-    def _process_rcseries(self, payload):
-        iq = ReadSensor._process_iq(payload)
-        r = iq[0::2]
-        c = -1.0/(2.0*np.pi*self.excitation_frequency*iq[1::2])
-        rc = np.empty((r.size + c.size))
-        rc[0::2] = r
-        rc[1::2] = c
-        return rc
-
-    def _process_rcparallel(self, payload):
-        iq = self._process_iq(payload)
-        i2q2_split = np.sum(np.split(iq**2, len(iq)//2), axis=1)
-        r = i2q2_split/iq[0::2]
-        c = -1.0*iq[1::2]/(2.0*np.pi*self.excitation_frequency*i2q2_split)
-        rc = np.empty((r.size + c.size))
-        rc[0::2] = r
-        rc[1::2] = c
-        return rc
+        return self.parser.process(payload)
 
     def _update_plot_buffer(self, buf):
         self.lock.acquire()
         for i in range(len(buf)):
             self.x_plot.append(buf[i]['Timestamp'])
-            self.y_plot.append([buf[i][j+1] for j in range(self.n_ch*2)])
+            self.y_plot.append([buf[i][j+1] for j in range(self.parser.n_ch*2)])
         self.lock.release()
 
     def _update_plot(self, i):
         self.lock.acquire(timeout=2)
-        for i in range(self.n_ch):
-            if self.n_ch==1:
+        for i in range(self.parser.n_ch):
+            if self.parser.n_ch==1:
                 ch_ax = self.ax # in case self.ax is a 1-D array.
             else:
                 ch_ax = self.ax[i]
@@ -195,7 +134,7 @@ class ReadSensor:
                 ch_ax[j].clear()
                 ch_ax[j].plot(np.asarray(self.x_plot), np.asarray(self.y_plot)[:,2*i+j]) # Need thread lock on x_plot, y_plot
                 ch_ax[j].set_xticks(ch_ax[j].get_xticks()[::5])
-                ch_ax[j].set_ylabel(self.ylabel[2*i+j] + " (" + self.unit[2*i+j] + ")")
+                ch_ax[j].set_ylabel(self.parser.ylabel[2*i+j] + " (" + self.parser.unit[2*i+j] + ")")
         self.lock.release()
         self.fig.autofmt_xdate(rotation=45)
         #self.fig.fmt_xdate()
@@ -205,11 +144,12 @@ class ReadSensor:
         if args.plot:
             while not self.initialized: # Need to be initialized to obtain n_ch from the data packet header.
                 sleep(0.1)
-            self.fig, self.ax = plt.subplots(self.n_ch, 2, sharex='col', squeeze=True)
+            self.fig, self.ax = plt.subplots(self.parser.n_ch, 2, sharex='col', squeeze=True)
             self.anim = animation.FuncAnimation(self.fig, self._update_plot, interval=100)
             plt.show()
     
     def cleanup(self):  
+        sys.stdout.write("\t=====CTRL-C received.=====\n")
         self.min.join()
         self.update_timer.stop()
         self.update()
