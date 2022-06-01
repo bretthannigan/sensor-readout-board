@@ -71,7 +71,8 @@ class SensorDataParserIQ(SensorDataParserRaw):
         y = np.zeros(x.shape)
         for i in range(len(x)//2):
             i_freq = np.where(self._cal_data[:,0]==self._excitation_frequency[i])
-            y[2*i] = x[2*i]*self._cal_data[i_freq,1] + self._cal_data[i_freq,2] # I channel
+            y[2*i
+            ] = x[2*i]*self._cal_data[i_freq,1] + self._cal_data[i_freq,2] # I channel
             if x[2*i]<x[2*i+1]: # Q channel
                 y[2*i+1] = x[2*i+1]*self._cal_data[i_freq,3] + self._cal_data[i_freq,4]
             else:
