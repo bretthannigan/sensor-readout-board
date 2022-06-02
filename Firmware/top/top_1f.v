@@ -38,7 +38,8 @@ module top_1f(
 	clk,
 
 	i_sclk,
-	i_sw_rst, i_sw_cal, i_sw_trig, i_sw_aux,
+	i_trig_n,
+	i_sw_rst_n, i_sw_cal_n, i_sw_trig_n, i_sw_aux_n,
 	i_sd_a,	i_sd_b, i_sd_dval,
 	i_RS232_RX,
 
@@ -53,7 +54,7 @@ module top_1f(
 
 localparam DELAY_COMPENSATION_LENGTH = 17;
 	
-input wire clk, i_sclk, i_sw_rst, i_sw_cal, i_sw_trig, i_sw_aux, i_sd_a, i_sd_b, i_sd_dval, i_RS232_RX;
+input wire clk, i_sclk, i_trig_n, i_sw_rst_n, i_sw_cal_n, i_sw_trig_n, i_sw_aux_n, i_sd_a, i_sd_b, i_sd_dval, i_RS232_RX;
 output wire o_sclk, o_en, o_led_en, o_led_busy, o_led_tx, o_led_aux, o_dac, o_adc_en_n, o_adc_zero, o_adc_cal, o_adc_rst, o_RS232_TX;
 output wire [7:0] o_led;
 output wire [3:0] o_test;
@@ -61,17 +62,13 @@ output wire [3:0] o_test;
 wire rst, en;
 wire lclk, sclk;
 
-assign o_led_busy = ~i_sd_dval;
-assign o_led_aux = ~i_sd_dval;
-
 // Enable
 assign en = 1;
-assign o_led_en = en;
 assign o_en = en;
 assign o_adc_en_n = ~en;
 // Reset
 assign o_sclk = sclk;
-assign rst = ~i_sw_rst;
+assign rst = ~i_sw_rst_n;
 
 // Sampling clock generation
 
@@ -102,7 +99,7 @@ assign sclk = clk25div[1]; // 6.375 MHz clock
 wire[10:0] phase;
 wire signed [15:0] sin, cos;
 
-assign phase = {clk25div[8:0], 2'b0}; //clk25div[13:3];//{clk25div[10:0], 2'b0};//; //{clk25div[9:0], 1'b0};
+assign phase = {clk25div[8:0], 2'b0}; // 49.805 kHz
 assign o_test[0] = sclk;
 //assign o_test[1] = phase[10];
 
@@ -146,8 +143,6 @@ shift #(
 	.i_data(sin),
 	.o_ser(sin_delay)
 );
-
-assign o_test[1] = sin_delay[15];
 
 shift #(
 	.WIDTH(16),
@@ -264,7 +259,7 @@ cic #(
 
 assign i0_short = i0_long[(CIC_OUTPUT_WIDTH-2)-:16];
 assign q0_short = q0_long[(CIC_OUTPUT_WIDTH-2)-:16];
-assign o_led = q0_long[(CIC_OUTPUT_WIDTH-1)-:8]; // new
+//assign o_led = q0_long[(CIC_OUTPUT_WIDTH-1)-:8]; // new
 
 // Output streaming
 
@@ -286,7 +281,19 @@ begin
 	packet_trigger <= (dclk && !dclk_delay) && en;
 end
 
-wire id = {i_sw_trig, 7'b0};
+// Enable pull-up resistor for trigger input.
+wire ext_trigger_n;
+
+SB_IO #(
+	.PIN_TYPE(6'b0000_01),
+	.PULLUP(1'b1)
+) trigger_input (
+	.PACKAGE_PIN(i_trig_n),
+	.D_IN_0(ext_trigger_n)
+);
+
+wire any_trigger;
+assign any_trigger = ~i_sw_trig_n || ~ext_trigger_n;
 
 min_transmit_fsm #(
 	.N_DATA_BYTE(4)
@@ -294,7 +301,7 @@ min_transmit_fsm #(
 	.i_clk(sclk),
 	.i_rst(rst),
 	.i_en(packet_trigger),
-	.i_id(id),
+	.i_id({3'b0, any_trigger, 1'b1, 3'b0}),
 	.i_data(iq_buffer),
 	.o_istx(istx),
 	.o_data(min_data)
@@ -352,8 +359,13 @@ uart #(
 	.tx_byte(fifo_data)
 );
 
-//assign o_test[2] = is_transmitting;
-//assign o_test[3] = q0_long[CIC_OUTPUT_WIDTH-1];
+// LED Outputs
+assign o_led_en = en;
+assign o_led_busy = ~i_sd_dval;
+assign o_led_tx = any_trigger;
+assign o_led_aux = is_transmitting;
+
+assign o_test[1] = phase[10];
 assign o_test[3] = dclk;
 
 endmodule

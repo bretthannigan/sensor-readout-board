@@ -17,7 +17,7 @@
 `define __SINE_LUT_INCLUDE__
 `endif
 `ifndef __ROM_2CH_INCLUDE__
-`include "../rom_2ch/rom_2ch.v"
+`include "../rom/rom_2ch.v"
 `endif
 `ifndef __SINE_LUT_QUARTERWAVE_LOGIC_INCLUDE__
 `include "sine_lut_quarterwave_logic.v"

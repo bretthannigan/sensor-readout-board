@@ -16,7 +16,7 @@
 `define __SINE_LUT_OLD_INCLUDE__
 `endif
 `ifndef __ROM_2CH_INCLUDE__
-`include "../rom_2ch/rom_2ch.v"
+`include "../rom/rom_2ch.v"
 `endif
 
 module sine_lut_old(i_clk, i_rst, i_en, i_phase, o_sin, o_cos);

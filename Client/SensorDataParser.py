@@ -61,7 +61,7 @@ class SensorDataParserIQ(SensorDataParserRaw):
     _DATATYPE = np.double
     _MAX_INPUT_VALUE = np.iinfo(np.dtype(np.int16)).max # Maximum 16-bit integer.
 
-    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibrate=True):
+    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibrate=False):
         super().__init__(n_ch, exc_amp, exc_freq, scaling)
         self._fmt = ['s'] + ['10.5e' for _ in range(2*self.n_ch)]
         self._is_calibrate = is_calibrate
@@ -89,7 +89,7 @@ class SensorDataParserMagPhase(SensorDataParserIQ):
     PREFIX = ["Mag", "Phase"]
     UNIT = ["dB", "deg"]
 
-    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibrate=True):
+    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibrate=False):
         super().__init__(n_ch, exc_amp, exc_freq, scaling, is_calibrate)
 
     def process(self, payload):
@@ -107,7 +107,7 @@ class SensorDataParserRCSeries(SensorDataParserIQ):
     PREFIX = ["R", "C"]
     UNIT = ["\u03A9", "F"]
 
-    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibrate=True):
+    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibrate=False):
         super().__init__(n_ch, exc_amp, exc_freq, scaling, is_calibrate)
 
     def process(self, payload):
@@ -123,7 +123,7 @@ class SensorDataParserRCParallel(SensorDataParserIQ):
     PREFIX = ["R", "C"]
     UNIT = ["\u03A9", "F"]
 
-    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibrate=True):
+    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibrate=False):
         super().__init__(n_ch, exc_amp, exc_freq, scaling, is_calibrate)
 
     def process(self, payload):

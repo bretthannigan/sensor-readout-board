@@ -17,12 +17,16 @@
 set_io --warn-no-port clk   J3
 set_io o_en                 G1
 
-### Switch Inputs
+### Testing Inputs
 
-set_io i_sw_rst             P1
-set_io i_sw_cal             N3
-set_io i_sw_trig            M2
-set_io i_sw_aux             L3
+set_io i_trig_n             D15
+
+### Switch Inputs (active low)
+
+set_io i_sw_rst_n           P1
+set_io i_sw_cal_n           N3
+set_io i_sw_trig_n          M2
+set_io i_sw_aux_n           L3
 
 ### ADC Inputs
 
