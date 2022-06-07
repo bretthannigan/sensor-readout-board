@@ -18,12 +18,12 @@ import argparse
 # Command line parameters
 parser = argparse.ArgumentParser(description='Logging utility for MENRVA sensor readout board.')
 parser.add_argument('--port', dest='port', action='store', default="COM8", help='Serial port for readout board.')
-parser.add_argument('--logfile', dest='logfile', action='store', default=datetime.datetime.now().strftime("Log_%Y-%m-%dT%H%M%S.csv"), help='Custom log file name.')
+parser.add_argument('--logfile', dest='logfile', action='store', default=datetime.datetime.now().strftime("Log_%Y-%m-%dT%H%M%S.tsv"), help='Custom log file name.')
 parser.add_argument('--plot', dest='plot', action='store_true', default=True, help='Turn on/off plotting data (default=on)')
 parser.add_argument('--mode', dest='mode', action='store', choices=['raw', 'iq', 'magphase', 'RCseries', 'RCparallel'], default='RCparallel', help='Impedance calculation mode.')
 parser.add_argument('--gain', dest='gain', action='store', type=float, choices=[1e-2, 1e-3, 1e-1, 1e-5], default=1e-4, help='Gain setting selected with readout board jumper.')
 parser.add_argument('--exc_amp', dest='excitation_amplitude', action='store', default=0.33, help='Excitation sine wave scaling factor.')
-parser.add_argument('--trig', dest='is_triggered', action='store_true', default=True, help='Enable triggering of logging from the device.')
+parser.add_argument('--trig', dest='is_triggered', action='store_true', default=False, help='Enable triggering of logging from the device.')
 args = parser.parse_args()
 
 class ReadSensor:
@@ -44,6 +44,7 @@ class ReadSensor:
         self.x_plot = deque(maxlen=100)
         self.y_plot = deque(maxlen=100)
         self.initialized = False
+        self._was_triggered = False
 
     def splash(self):
         sys.stdout.write('\n')
@@ -72,9 +73,9 @@ class ReadSensor:
         sys.stdout.write('\t=====Detected ' + str(n) + ' channel(s).=====\n')
 
     def _init_logfile(self, hdr):
-        log_header = self.parser.dtype[0][0]
+        log_header = 'Timestamp'
         for i in range(self.parser.n_ch*2):
-            log_header = log_header + ',' + self.parser.dtype[i+1][0]
+            log_header = log_header + '\t' + self.parser.dtype[i][0]
         log_header = log_header + '\n'
         with open(args.logfile, 'xt') as f:
             f.write(log_header)
@@ -83,41 +84,50 @@ class ReadSensor:
         n = self.rx_q.qsize()
         i = 0
         if self.initialized:
-            buffer_data = np.zeros(n, dtype=self.parser.dtype)
             buffer_header = np.zeros(n, dtype=np.ubyte)
+            buffer_timestamp = np.zeros(n, dtype=datetime.datetime)
+            buffer_data = np.zeros((n, 2*self.parser.n_ch))
         for i in range(n):
             item = self.rx_q.get_nowait()
             timestamp = item[0]
             if not self.initialized:
+                self._start_time = timestamp
                 header = item[1].min_id
                 n_packet = len(item[1].payload)//4
                 self._init_ch(header, n_packet)
-                buffer_data = np.zeros(n, dtype=self.parser.dtype)
                 buffer_header = np.zeros(n, dtype=np.ubyte)
+                buffer_timestamp = np.zeros(n, dtype=datetime.datetime)
+                buffer_data = np.zeros((n, 2*self.parser.n_ch))
                 if args.logfile:
                     self._init_logfile(header)
             payload = self._process_payload(item[1].payload, mode=args.mode)
-            buffer_data[i] = (timestamp.strftime("%Y-%m-%dT%H%M%S.%f"), *payload)
+            buffer_timestamp[i] = timestamp
+            buffer_data[i,:] = payload
             buffer_header[i] = item[1].min_id
             self.rx_q.task_done()
         if self.initialized:
             sys.stdout.write('[' + str(n) + ']')
-            for i in range(2*self.parser.n_ch):
-                sys.stdout.write(("\t" + self.parser.ylabel[i] + ": {:10.5e} " + self.parser.unit[i]).format(np.average([x[i+1] for _, x in enumerate(buffer_data)])))
+            if args.logfile:
+                if args.is_triggered:
+                    is_logged = (buffer_header & (16).to_bytes(1, byteorder='big')[0]).astype(bool)
+                    if np.any(is_logged):
+                        if not self._was_triggered:
+                            self._start_time = buffer_timestamp[np.argmax(is_logged)]
+                            self._was_triggered = True
+                        sys.stdout.write('*')
+                        self._update_logfile(np.vectorize(datetime.timedelta.total_seconds)(buffer_timestamp[is_logged] - self._start_time), buffer_data[is_logged])
+                    else:
+                        self._was_triggered = False
+                else:
+                    self._update_logfile(np.vectorize(datetime.timedelta.total_seconds)(buffer_timestamp - self._start_time), buffer_data)
+            if args.plot:
+                self._update_plot_buffer(np.vectorize(lambda x : datetime.datetime.strftime(x, '%Y-%m-%dT%H%M%S.%f'))(buffer_timestamp), buffer_data)
+            sys.stdout.write((''.join("\t%s: {:10.5e} %s" % (x[0], x[1]) for x in zip(self.parser.ylabel, self.parser.unit))).format(*np.average(buffer_data, axis=0)))
             sys.stdout.write('\n')
-        if args.logfile and self.initialized:
-            if args.is_triggered:
-                is_logged = (buffer_header & (16).to_bytes(1, byteorder='big')[0]).astype(bool)
-                if np.any(is_logged):
-                    self._update_logfile(buffer_data[is_logged])
-            else:
-                self._update_logfile(buffer_data)
-        if args.plot and self.initialized:
-            self._update_plot_buffer(buffer_data)
 
-    def _update_logfile(self, buf):
+    def _update_logfile(self, ts, data):
         with open(args.logfile, 'a') as f:
-            np.savetxt(f, buf, delimiter=',', fmt=self.parser.fmt_np)
+            np.savetxt(f, np.column_stack((ts, data)), delimiter='\t', fmt=self.parser.fmt_np)
             
     def _process_payload(self, payload, mode="iq"):
         dt = np.dtype(np.int16)
@@ -125,11 +135,11 @@ class ReadSensor:
         payload = np.frombuffer(payload, dtype=dt)
         return self.parser.process(payload)
 
-    def _update_plot_buffer(self, buf):
+    def _update_plot_buffer(self, ts, data):
         self.lock.acquire()
-        for i in range(len(buf)):
-            self.x_plot.append(buf[i]['Timestamp'])
-            self.y_plot.append([buf[i][j+1] for j in range(self.parser.n_ch*2)])
+        for i in range(len(ts)):
+            self.x_plot.append(ts[i])
+            self.y_plot.append([data[i][j] for j in range(self.parser.n_ch*2)])
         self.lock.release()
 
     def _update_plot(self, i):
