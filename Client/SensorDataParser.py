@@ -42,18 +42,18 @@ class SensorDataParserRaw:
     def ylabel(self):
         return self._ylabel
 
-class SensorDataParserIQ(SensorDataParserRaw):
-    PREFIX = ["I", "Q"]
-    UNIT = ["", ""]
-    _DATATYPE = np.double
-    _MAX_INPUT_VALUE = np.iinfo(np.dtype(np.int16)).max # Maximum 16-bit integer.
+# class SensorDataParserIQ(SensorDataParserRaw):
+#     PREFIX = ["I", "Q"]
+#     UNIT = ["", ""]
+#     _DATATYPE = np.double
+#     _MAX_INPUT_VALUE = np.iinfo(np.dtype(np.int16)).max # Maximum 16-bit integer.
 
-    def __init__(self, n_ch, exc_amp=1., exc_freq=0., scaling=1.):
-        super().__init__(n_ch, exc_amp, exc_freq, scaling)
-        self._fmt = ['s'] + ['10.5e' for _ in range(2*self.n_ch)]
+#     def __init__(self, n_ch, exc_amp=1., exc_freq=0., scaling=1.):
+#         super().__init__(n_ch, exc_amp, exc_freq, scaling)
+#         self._fmt = ['s'] + ['10.5e' for _ in range(2*self.n_ch)]
 
-    def process(self, payload):
-        return payload/((self._MAX_INPUT_VALUE//2)*self._excitation_amplitude*self._scaling)
+#     def process(self, payload):
+#         return payload/((self._MAX_INPUT_VALUE//2)*self._excitation_amplitude*self._scaling)
 
 class SensorDataParserIQ(SensorDataParserRaw):
     PREFIX = ["I", "Q"]
@@ -71,8 +71,7 @@ class SensorDataParserIQ(SensorDataParserRaw):
         y = np.zeros(x.shape)
         for i in range(len(x)//2):
             i_freq = np.where(self._cal_data[:,0]==self._excitation_frequency[i])
-            y[2*i
-            ] = x[2*i]*self._cal_data[i_freq,1] + self._cal_data[i_freq,2] # I channel
+            y[2*i] = x[2*i]*self._cal_data[i_freq,1] + self._cal_data[i_freq,2] # I channel
             if x[2*i]<x[2*i+1]: # Q channel
                 y[2*i+1] = x[2*i+1]*self._cal_data[i_freq,3] + self._cal_data[i_freq,4]
             else:
