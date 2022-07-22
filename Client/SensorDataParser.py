@@ -1,26 +1,36 @@
+import sys
 import numpy as np
+import sklearn
+import pickle
+
 
 class SensorDataParserRaw:
     PREFIX = ["I", "Q"]
     UNIT = ["counts", "counts"]
     _DATATYPE = np.int16
 
-    def __init__(self, n_ch, exc_amp=1., exc_freq=0., scaling=1.):
+    def __init__(self, n_ch, n_sig=2, exc_amp=1., exc_freq=0., scaling=1.):
         self._n_ch = n_ch
+        self._n_sig_per_ch = n_sig
         self._excitation_amplitude = exc_amp
         self._excitation_frequency = exc_freq
         self._scaling = scaling
-        self._dtype = [(self.PREFIX[j] + "_" + str(i), self._DATATYPE) for i in range(self.n_ch) for j in range(2)]
-        self._fmt = ['s'] + ['i' for _ in range(2*self.n_ch)]
-        self._ylabel = ['Ch' + str(i) + "_" + self.PREFIX[j] for i in range(self.n_ch) for j in range(2)]
-        self._unit = self.UNIT * self.n_ch
+        self._dtype = [(self.PREFIX[j] + "_" + str(i), self._DATATYPE) for i in range(self._n_ch) for j in range(self._n_sig_per_ch)]
+        self._fmt = ['s'] + ['i' for _ in range(self._n_sig_per_ch*self._n_sig_per_ch)]
+        self._ylabel = ['Ch' + str(i) + "_" + self.PREFIX[j] for i in range(self._n_ch) for j in range(self._n_sig_per_ch)]
+        self._unit = self.UNIT * self._n_ch
 
     def process(self, payload):
         return payload
+        sklearn.ensemble.RandomForestRegressor().predict_single
 
     @property
     def n_ch(self):
         return self._n_ch
+
+    @property
+    def n_sig_per_ch(self):
+        return self._n_sig_per_ch
 
     @property
     def dtype(self):
@@ -61,10 +71,10 @@ class SensorDataParserIQ(SensorDataParserRaw):
     _DATATYPE = np.double
     _MAX_INPUT_VALUE = np.iinfo(np.dtype(np.int16)).max # Maximum 16-bit integer.
 
-    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibrate=False):
-        super().__init__(n_ch, exc_amp, exc_freq, scaling)
-        self._fmt = ['s'] + ['10.5e' for _ in range(2*self.n_ch)]
-        self._is_calibrate = is_calibrate
+    def __init__(self, n_ch, n_sig=2, exc_amp=1., exc_freq=[0.], scaling=1., is_calibration=False):
+        super().__init__(n_ch, n_sig=n_sig, exc_amp=exc_amp, exc_freq=exc_freq, scaling=scaling)
+        self._fmt = ['s'] + ['10.5e' for _ in range(self._n_sig_per_ch*self.n_ch)]
+        self._is_calibration = is_calibration
         self._cal_data = np.loadtxt('cal.csv', delimiter=',', skiprows=1)
 
     def calibrate(self, x):
@@ -80,16 +90,32 @@ class SensorDataParserIQ(SensorDataParserRaw):
 
     def process(self, payload):
         payload = payload/((self._MAX_INPUT_VALUE//2)*self._excitation_amplitude*self._scaling)
-        if self._is_calibrate:
+        if self._is_calibration:
             payload = self.calibrate(payload)
         return payload
+
+class SensorDataParserModel(SensorDataParserIQ):
+    PREFIX = ["Strain"]
+    UNIT = ["%"]
+    
+    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibration=False, model_path='model.sav'):
+        super().__init__(n_ch, n_sig=1, exc_amp=exc_amp, exc_freq=exc_freq, scaling=scaling, is_calibration=is_calibration)
+        self._fmt = ['s'] + ['10.5f' for _ in range(self._n_sig_per_ch*self.n_ch)]
+        sys.stdout.write('\t=====Loading model from: ' + model_path + '=====\n')
+        self._model = pickle.load(open(model_path, 'rb'))
+        sys.stdout.write('\t\t' + str(self._model) + '\n')
+    
+    def process(self, payload):
+        iq = super().process(payload)
+        percent_strain = self._model.predict(np.concatenate((iq[0::2], iq[1::2])).reshape(-1, len(iq)))*100.0
+        return percent_strain
 
 class SensorDataParserMagPhase(SensorDataParserIQ):
     PREFIX = ["Mag", "Phase"]
     UNIT = ["dB", "deg"]
 
-    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibrate=False):
-        super().__init__(n_ch, exc_amp, exc_freq, scaling, is_calibrate)
+    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibration=False):
+        super().__init__(n_ch, exc_amp=exc_amp, exc_freq=exc_freq, scaling=scaling, is_calibration=is_calibration)
 
     def process(self, payload):
         iq = super().process(payload)
@@ -99,15 +125,15 @@ class SensorDataParserMagPhase(SensorDataParserIQ):
         phase = np.angle(iq_complex)
         mag_phase = np.empty((mag.size + phase.size))
         mag_phase[0::2] = 20.0*np.log10(2.0*mag)
-        mag_phase[1::2] = -2.0*(180.0/np.pi)*phase
+        mag_phase[1::2] = -1.0*(180.0/np.pi)*phase
         return mag_phase
 
 class SensorDataParserRCSeries(SensorDataParserIQ):
     PREFIX = ["R", "C"]
     UNIT = ["\u03A9", "F"]
 
-    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibrate=False):
-        super().__init__(n_ch, exc_amp, exc_freq, scaling, is_calibrate)
+    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibration=False):
+        super().__init__(n_ch, exc_amp=exc_amp, exc_freq=exc_freq, scaling=scaling, is_calibration=is_calibration)
 
     def process(self, payload):
         iq = super().process(payload)
@@ -122,8 +148,8 @@ class SensorDataParserRCParallel(SensorDataParserIQ):
     PREFIX = ["R", "C"]
     UNIT = ["\u03A9", "F"]
 
-    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibrate=False):
-        super().__init__(n_ch, exc_amp, exc_freq, scaling, is_calibrate)
+    def __init__(self, n_ch, exc_amp=1., exc_freq=[0.], scaling=1., is_calibration=False):
+        super().__init__(n_ch, exc_amp=exc_amp, exc_freq=exc_freq, scaling=scaling, is_calibration=is_calibration)
 
     def process(self, payload):
         iq = super().process(payload)

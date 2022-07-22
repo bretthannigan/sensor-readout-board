@@ -99,7 +99,7 @@ assign sclk = clk25div[1]; // 6.375 MHz clock
 wire[10:0] phase;
 wire signed [15:0] sin, cos;
 
-assign phase = {clk25div[8:0], 2'b0}; // 49.805 kHz
+assign phase = {clk25div[7:0], 3'b0}; // 12.451 kHz
 assign o_test[0] = sclk;
 //assign o_test[1] = phase[10];
 
