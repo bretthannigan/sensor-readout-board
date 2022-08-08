@@ -238,13 +238,6 @@ Connection ~ 5500 3250
 Wire Wire Line
 	5500 3000 5500 3250
 Wire Wire Line
-	5000 3250 4500 3250
-Wire Wire Line
-	5000 3250 5100 3250
-Connection ~ 5000 3250
-Wire Wire Line
-	5000 3000 5000 3250
-Wire Wire Line
 	3500 3650 4100 3650
 Wire Wire Line
 	5500 4400 5500 4850
@@ -252,14 +245,7 @@ Wire Wire Line
 	5400 4850 5500 4850
 Connection ~ 5500 4850
 Wire Wire Line
-	4600 4400 5000 4400
-Wire Wire Line
 	5100 4850 5000 4850
-Wire Wire Line
-	5000 4850 5000 4400
-Connection ~ 5000 4400
-Wire Wire Line
-	5000 4400 5100 4400
 Wire Wire Line
 	7050 4300 7300 4300
 $Comp
@@ -324,7 +310,7 @@ F 3 "~" H 5750 3750 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 Text Notes 750  7900 0    50   ~ 0
-.ac dec 1000 1 100meg \n\n.meas ac dc_gain find vdb(/Vout) at=1\n.meas ac 1k_gain find vdb(/Vout) at=1k\n.meas ac 10k_gain find vdb(/Vout) at=10k\n.meas ac 100k_gain find vdb(/Vout) at=100k​\n\n.meas ac dc_phase find vp(/Vout) at=1\n.meas ac 1k_phase find vp(/Vout) at=1k\n.meas ac 10k_phase find vp(/Vout) at=10k\n.meas ac 100k_phase find vp(/Vout) at=100k
+.ac dec 10000 0.1 100meg \n\n.meas ac dc_gain find vdb(/Vout) at=1\n.meas ac 1k_gain find vdb(/Vout) at=1k\n.meas ac 10k_gain find vdb(/Vout) at=10k\n.meas ac 100k_gain find vdb(/Vout) at=100k​\n\n.meas ac dc_phase find vp(/Vout) at=1\n.meas ac 1k_phase find vp(/Vout) at=1k\n.meas ac 10k_phase find vp(/Vout) at=10k\n.meas ac 100k_phase find vp(/Vout) at=100k
 Wire Wire Line
 	7500 4300 7500 5000
 Wire Wire Line
@@ -408,6 +394,28 @@ F 3 "~" H 5250 4850 50  0001 C CNN
 	1    5250 4850
 	0    -1   -1   0   
 $EndComp
+Wire Wire Line
+	3500 4550 3500 5000
+Wire Wire Line
+	4000 3850 4000 5000
+Wire Wire Line
+	4400 3850 4500 3850
+Wire Wire Line
+	4400 3650 4600 3650
+Wire Wire Line
+	5000 4400 5100 4400
+Wire Wire Line
+	4600 4400 5000 4400
+Connection ~ 5000 4400
+Wire Wire Line
+	5000 4850 5000 4400
+Wire Wire Line
+	5000 3250 5100 3250
+Wire Wire Line
+	5000 3250 4500 3250
+Connection ~ 5000 3250
+Wire Wire Line
+	5000 3000 5000 3250
 $Comp
 L Device:C C1
 U 1 1 5F1DDDA7
@@ -419,12 +427,4 @@ F 3 "~" H 5250 3000 50  0001 C CNN
 	1    5250 3000
 	0    -1   -1   0   
 $EndComp
-Wire Wire Line
-	3500 4550 3500 5000
-Wire Wire Line
-	4000 3850 4000 5000
-Wire Wire Line
-	4400 3850 4500 3850
-Wire Wire Line
-	4400 3650 4600 3650
 $EndSCHEMATC

@@ -310,7 +310,7 @@ F 3 "~" H 5750 3750 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 Text Notes 750  7900 0    50   ~ 0
-.ac dec 10000 0.1 100meg \n\n.meas ac dc_gain find vdb(/Vout) at=1\n.meas ac 1k_gain find vdb(/Vout) at=1k\n.meas ac 10k_gain find vdb(/Vout) at=10k\n.meas ac 100k_gain find vdb(/Vout) at=100k​\n\n.meas ac dc_phase find vp(/Vout) at=1\n.meas ac 1k_phase find vp(/Vout) at=1k\n.meas ac 10k_phase find vp(/Vout) at=10k\n.meas ac 100k_phase find vp(/Vout) at=100k
+.ac dec 10000 0.1 100meg \n\n.meas ac dc_gain find vdb(/Vout) at=1\n.meas ac 1k_gain find vdb(/Vout) at=1k\n.meas ac 10k_gain find vdb(/Vout) at=10k\n.meas ac 100k_gain find vdb(/Vout) at=100k​\n.meas ac dc_phase find vp(/Vout) at=1\n.meas ac 1k_phase find vp(/Vout) at=1k\n.meas ac 10k_phase find vp(/Vout) at=10k\n.meas ac 100k_phase find vp(/Vout) at=100k
 Wire Wire Line
 	7500 4300 7500 5000
 Wire Wire Line

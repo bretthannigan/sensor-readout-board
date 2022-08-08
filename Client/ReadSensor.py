@@ -17,10 +17,10 @@ import argparse
 
 # Command line parameters
 parser = argparse.ArgumentParser(description='Logging utility for MENRVA sensor readout board.')
-parser.add_argument('--port', dest='port', action='store', default="COM12", help='Serial port for readout board.')
+parser.add_argument('--port', dest='port', action='store', default="COM8", help='Serial port for readout board.')
 parser.add_argument('--logfile', dest='logfile', action='store', default=datetime.datetime.now().strftime("Log_%Y-%m-%dT%H%M%S.tsv"), help='Custom log file name.')
 parser.add_argument('--plot', dest='plot', action='store_true', default=True, help='Turn on/off plotting data (default=on)')
-parser.add_argument('--mode', dest='mode', action='store', choices=['raw', 'iq', 'model', 'magphase', 'RCseries', 'RCparallel'], default='model', help='Impedance calculation mode.')
+parser.add_argument('--mode', dest='mode', action='store', choices=['raw', 'iq', 'model', 'magphase', 'RCseries', 'RCparallel'], default='iq', help='Impedance calculation mode.')
 parser.add_argument('--gain', dest='gain', action='store', type=float, choices=[1e-2, 1e-3, 1e-4, 1e-5], default=1e-5, help='Gain setting selected with readout board jumper.')
 parser.add_argument('--exc_amp', dest='excitation_amplitude', action='store', default=0.33, help='Excitation sine wave scaling factor.')
 parser.add_argument('--trig', dest='is_triggered', action='store_true', default=False, help='Enable triggering of logging from the device.')
@@ -68,17 +68,17 @@ class ReadSensor:
 
     def _init_ch(self, hdr, n):
         if args.mode == 'raw':
-            self.parser = SensorDataParserRaw(n, args.excitation_amplitude, self.excitation_frequency, args.gain)
+            self.parser = SensorDataParserRaw(n, exc_amp=args.excitation_amplitude, exc_freq=self.excitation_frequency, scaling=args.gain)
         elif args.mode == 'iq':
-            self.parser = SensorDataParserIQ(n, args.excitation_amplitude, self.excitation_frequency, args.gain, is_calibration=args.is_calibration)
+            self.parser = SensorDataParserIQ(n, exc_amp=args.excitation_amplitude, exc_freq=self.excitation_frequency, scaling=args.gain, is_calibration=args.is_calibration)
         elif args.mode == 'model':
-            self.parser = SensorDataParserModel(n, args.excitation_amplitude, self.excitation_frequency, args.gain, is_calibration=args.is_calibration, model_path=args.model_path)
+            self.parser = SensorDataParserModel(n, exc_amp=args.excitation_amplitude, exc_freq=self.excitation_frequency, scaling=args.gain, is_calibration=args.is_calibration, model_path=args.model_path)
         elif args.mode == 'magphase':
-            self.parser = SensorDataParserMagPhase(n, args.excitation_amplitude, self.excitation_frequency, args.gain, is_calibration=args.is_calibration)
+            self.parser = SensorDataParserMagPhase(n, exc_amp=args.excitation_amplitude, exc_freq=self.excitation_frequency, scaling=args.gain, is_calibration=args.is_calibration)
         elif args.mode == 'RCseries':
-            self.parser = SensorDataParserRCSeries(n, args.excitation_amplitude, self.excitation_frequency, args.gain, is_calibration=args.is_calibration)
+            self.parser = SensorDataParserRCSeries(n, exc_amp=args.excitation_amplitude, exc_freq=self.excitation_frequency, scaling=args.gain, is_calibration=args.is_calibration)
         elif args.mode == 'RCparallel':
-            self.parser = SensorDataParserRCParallel(n, args.excitation_amplitude, self.excitation_frequency, args.gain, is_calibration=args.is_calibration)
+            self.parser = SensorDataParserRCParallel(n, exc_amp=args.excitation_amplitude, exc_freq=self.excitation_frequency, scaling=args.gain, is_calibration=args.is_calibration)
         self.initialized = True
         sys.stdout.write('\t=====Detected ' + str(n) + ' channel(s).=====\n')
 
