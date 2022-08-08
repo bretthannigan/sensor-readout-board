@@ -22,7 +22,6 @@ class SensorDataParserRaw:
 
     def process(self, payload):
         return payload
-        sklearn.ensemble.RandomForestRegressor().predict_single
 
     @property
     def n_ch(self):
