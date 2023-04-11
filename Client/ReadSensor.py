@@ -17,13 +17,13 @@ import argparse
 
 # Command line parameters
 parser = argparse.ArgumentParser(description='Logging utility for MENRVA sensor readout board.')
-parser.add_argument('--port', dest='port', action='store', default="COM8", help='Serial port for readout board.')
+parser.add_argument('--port', dest='port', action='store', default="COM12", help='Serial port for readout board.')
 parser.add_argument('--logfile', dest='logfile', action='store', default=datetime.datetime.now().strftime("Log_%Y-%m-%dT%H%M%S.tsv"), help='Custom log file name.')
-parser.add_argument('--plot', dest='plot', action='store_true', default=True, help='Turn on/off plotting data (default=on)')
+parser.add_argument('--plot', dest='plot', action='store_true', default=False, help='Turn on/off plotting data (default=on)')
 parser.add_argument('--mode', dest='mode', action='store', choices=['raw', 'iq', 'model', 'magphase', 'RCseries', 'RCparallel'], default='iq', help='Impedance calculation mode.')
-parser.add_argument('--gain', dest='gain', action='store', type=float, choices=[1e-2, 1e-3, 1e-4, 1e-5], default=1e-5, help='Gain setting selected with readout board jumper.')
+parser.add_argument('--gain', dest='gain', action='store', type=float, choices=[1e-2, 1e-3, 1e-4, 1e-5], default=1e-4, help='Gain setting selected with readout board jumper.')
 parser.add_argument('--exc_amp', dest='excitation_amplitude', action='store', default=0.33, help='Excitation sine wave scaling factor.')
-parser.add_argument('--trig', dest='is_triggered', action='store_true', default=False, help='Enable triggering of logging from the device.')
+parser.add_argument('--trig', dest='is_triggered', action='store_true', default=True, help='Enable triggering of logging from the device.')
 parser.add_argument('--cal', dest='is_calibration', action='store_true', default=False, help='Enable adjustment of measurement using IQ calibration data.')
 parser.add_argument('--model', dest='model_path', action='store', default='model.sav', help='Path to model (only applicable for \'model\' calibration mode).')
 args = parser.parse_args()
@@ -171,7 +171,10 @@ class ReadSensor:
                 else:
                     ch_sig_ax = ch_ax[j]
                 ch_sig_ax.clear()
-                ch_sig_ax.plot(np.asarray(self.x_plot), np.asarray(self.y_plot)[:,self.parser.n_sig_per_ch*i+j]) # Need thread lock on x_plot, y_plot
+                try:
+                    ch_sig_ax.plot(np.asarray(self.x_plot), np.asarray(self.y_plot)[:,self.parser.n_sig_per_ch*i+j]) # Need thread lock on x_plot, y_plot
+                except IndexError:
+                    return
                 ch_sig_ax.set_xticks(ch_sig_ax.get_xticks()[::10])
                 ch_sig_ax.set_ylabel(self.parser.ylabel[self.parser.n_sig_per_ch*i+j] + " (" + self.parser.unit[self.parser.n_sig_per_ch*i+j] + ")")
         self.lock.release()

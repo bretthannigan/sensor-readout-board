@@ -16,7 +16,7 @@ class SensorDataParserRaw:
         self._excitation_frequency = exc_freq
         self._scaling = scaling
         self._dtype = [(self.PREFIX[j] + "_" + str(i), self._DATATYPE) for i in range(self._n_ch) for j in range(self._n_sig_per_ch)]
-        self._fmt = ['s'] + ['i' for _ in range(self._n_sig_per_ch*self._n_sig_per_ch)]
+        self._fmt = ['s'] + ['i' for _ in range(self._n_ch*self._n_sig_per_ch)]
         self._ylabel = ['Ch' + str(i) + "_" + self.PREFIX[j] for i in range(self._n_ch) for j in range(self._n_sig_per_ch)]
         self._unit = self.UNIT * self._n_ch
 
