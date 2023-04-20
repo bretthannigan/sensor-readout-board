@@ -5,3 +5,4 @@ SimpleSigmaDeltaADCSourceCode/
 Log_*.csv
 Log_*.tsv
 /cic/out.vcd
+model.sav
