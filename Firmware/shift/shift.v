@@ -9,6 +9,8 @@
 //                  2018-11-12 Added parallel out functionality.
 //                  2021-03-05 Added conditional compilation flag.
 //
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `ifndef __SHIFT_INCLUDE__

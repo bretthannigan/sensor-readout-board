@@ -1,3 +1,5 @@
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+
 // 1st order sigma delta DAC sine wave generator.
 `timescale 1ns/1ns
 `include "pll.v"

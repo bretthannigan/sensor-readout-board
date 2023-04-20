@@ -11,6 +11,8 @@
 //                  2022-02-09 Separated quarter-wave logic into own module.
 //                             Changed name from sine_lut_2.v to sine_lut.v.
 //
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `ifndef __SINE_LUT_INCLUDE__

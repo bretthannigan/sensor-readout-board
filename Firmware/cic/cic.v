@@ -11,6 +11,8 @@
 //                  2021-05-26 Removed sign extension for i_data (caused overflow with 1-bit I_WIDTH).
 //                  2021-06-01 Replaced sign extension for i_data.
 //
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `ifndef __CIC_INCLUDE__

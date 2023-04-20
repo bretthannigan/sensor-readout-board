@@ -7,6 +7,8 @@
 //
 // Change history:  2020-06-01 Created file.
 //
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `ifndef __CIC_PRUNED_INCLUDE__

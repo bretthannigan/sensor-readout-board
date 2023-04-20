@@ -7,6 +7,8 @@
 //
 // Change history:  2021-12-01 Created file from fir_csd_logic.v.
 //
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `ifndef __FIR_CSD_LOGIC_INCLUDE__

@@ -11,6 +11,8 @@
 //                  2021-05-07 Moved increment of addr_rd to read block to fix
 //                             "multiply driven" error.
 //
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `default_nettype none

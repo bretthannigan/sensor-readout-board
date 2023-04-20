@@ -1,3 +1,5 @@
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+
 `timescale 1ns/1ns
 `include "pll.v"
 `ifndef __SINE_LUT_INCLUDE__

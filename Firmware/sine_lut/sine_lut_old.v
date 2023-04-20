@@ -10,6 +10,8 @@
 //                  2021-03-05 Added conditional compilation flag.
 //                  2022-02-09 Changed name from sine_lut.v to sine_lut_old.v.
 //
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `ifndef __SINE_LUT_OLD_INCLUDE__

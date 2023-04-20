@@ -10,6 +10,8 @@
 //                             Seems to be correct for impulse and step responses.
 //                             Decimated impulse and step responses are sensitive to starting point. Must begin step/impulse at next rising edge of clk after dec_clk goes high.
 //
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `timescale 1ns/1ns

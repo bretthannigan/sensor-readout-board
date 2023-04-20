@@ -8,6 +8,8 @@
 //
 // Change history:  2022-06-01 Created file (adapted from sine_lut_2ch.v).
 //
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `ifndef __SINE_LUT_4CH_INCLUDE__

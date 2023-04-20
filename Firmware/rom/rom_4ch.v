@@ -7,6 +7,8 @@
 //
 // Change history:  2022-02-09 Created file (adapted from rom_2ch.v).
 //
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `ifndef __ROM_4CH_INCLUDE__

@@ -1,3 +1,5 @@
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+
 `ifndef __CIC_COMB_INCLUDE__
 `define __CIC_COMB_INCLUDE__
 `endif

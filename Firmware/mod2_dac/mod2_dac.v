@@ -13,6 +13,8 @@
 // Notes: This implementation uses delaying integrators (with a_1 = a_2 = 1 and b = 2), see Fig. 3.15 in [1]
 //        If instability is observed with large input, reduce i_data e.g. by a factor of 2.
 //
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `ifndef __MOD2_DAC_INCLUDE__

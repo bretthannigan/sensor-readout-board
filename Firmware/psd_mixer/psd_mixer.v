@@ -8,6 +8,8 @@
 // Change history:  2020-11-17 Created file.
 //                  2021-03-05 Added conditional compilation flag.
 //
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `ifndef __PSD_MIXER_INCLUDE__

@@ -1,3 +1,5 @@
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+
 module cic_integrator(i_clk, i_en, i_rst, i_data, o_data);
     parameter WIDTH = 8;
     input i_clk, i_en, i_rst;

@@ -1,8 +1,9 @@
+# ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+
 import sys
 import numpy as np
 import sklearn
 import pickle
-
 
 class SensorDataParserRaw:
     PREFIX = ["I", "Q"]

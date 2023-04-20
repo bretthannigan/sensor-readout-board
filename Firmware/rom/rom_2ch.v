@@ -9,6 +9,8 @@
 //                  2021-03-02 Parameterized data loading path.
 //                  2021-03-05 Added conditional compilation flag.
 //
+// ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `ifndef __ROM_2CH_INCLUDE__

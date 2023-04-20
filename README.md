@@ -1,7 +1,7 @@
 
 # Sensor Readout Board
 
-<img src="Concept.jpg" alt="Hardware rendering" width="400"/>
+<img src="Concept.jpg" alt="Concept image" width="400"/>
 
 This repository includes the software, firmware, and hardware for the readout electronics used in the paper:
 
