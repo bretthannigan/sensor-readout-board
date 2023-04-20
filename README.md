@@ -29,6 +29,6 @@ The `Firmware` folder contains many general-purpose logic buliding blocks such a
 
 <img src="Hardware/Enclosure/Rendering.png" alt="Hardware rendering" width="300"/>
 
-The `Hardware/Enclosure` subfolder contains Solidworks files for the system enclosure. These were printed on a FDM 3D printer. The `Hardware\PCB` subfolder contains PCB schematic and layout files from KiCAD. The other subfolders contain (disorganized) SPICE simulations, previous iterations, and other files used during development.
+The `Hardware/Enclosure` subfolder contains Solidworks files for the system enclosure. These were printed on a FDM 3D printer. The `Hardware/PCB` subfolder contains PCB schematic and layout files from KiCAD. The other subfolders contain (disorganized) SPICE simulations, previous iterations, and other files used during development.
 
 ©2023 ETH Zurich, Brett Hannigan; D-HEST; Biomedical and Mobile Health Technology (BMHT) Lab; Carlo Menon
